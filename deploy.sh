@@ -30,7 +30,9 @@ if git diff-index --quiet HEAD --; then
     # Create tag
     echo "Deploying ${VERSION}"
 
-    git push heroku ${VERSION}:master
+    git push heroku ${VERSION}^{}:master
+#    About the suffix ^{} it's to dereference the tag recursively until a non-tag object is found
+#    More info at: http://disq.us/url?url=http%3A%2F%2Fschacon.github.io%2Fgit%2Fgitrevisions.html%3Axv6f9SjpbnDbg0PpDd1jr0H4iQQ&cuid=1188621
 
     echo "Done."
 else
