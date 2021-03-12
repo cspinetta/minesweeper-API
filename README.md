@@ -28,17 +28,33 @@ sbt clean coverage test coverageReport
 ````
 
 ## TODO list
-- [x] Initial Setup
-- [ ] API
-- [ ] Logic
-- [ ] Functional tests
-- [ ] Doc + Swagger
-- [ ] Contextual logging
-- [ ] Metrics
-- [ ] Tracing
-- [ ] Playground with a docker compose
-- [ ] Architecture decision record 
 
+1. [x] Initial Setup
+2. [ ] Release and Deployment process
+3. [ ] Core functionalities (listed below)
+4. [ ] Functional tests
+5. [ ] Doc + Swagger
+6. [ ] Contextual logging
+7. [ ] Metrics
+8. [ ] Tracing
+9. [ ] Playground with a docker compose
+10. [ ] Architecture decision record
+
+**Note:** the goal is to cover the first 5 points within the next week
+to get an productive MVP with the functionalities required.
+
+### Core functionalities
+
+- [ ] Design and implement a documented RESTful API for the game (think of a mobile app for your API)
+- [ ] Implement an API client library for the API designed above. Ideally, in a different language, of your preference, to the one used for the API
+- [ ] When a cell with no adjacent mines is revealed, all adjacent squares will be revealed (and repeat)
+- [ ] Ability to 'flag' a cell with a question mark or red flag
+- [ ] Detect when game is over
+- [ ] Persistence
+- [ ] Time tracking
+- [ ] Ability to start a new game and preserve/resume the old ones
+- [ ] Ability to select the game parameters: number of rows, columns, and mines
+- [ ] Ability to support multiple users/accounts
 
 [Scala]: https://www.scala-lang.org/
 [Play framework]: https://www.playframework.com/
