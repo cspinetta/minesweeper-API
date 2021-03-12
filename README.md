@@ -27,10 +27,17 @@ sbt clean run
 sbt clean coverage test coverageReport
 ````
 
+## Release and Deployment process
+
+````shell script
+./release.sh 0.0.1
+./deploy.sh 0.0.1
+````
+
 ## TODO list
 
 1. [x] Initial Setup
-2. [ ] Release and Deployment process
+2. [x] Release and Deployment process
 3. [ ] Core functionalities (listed below)
 4. [ ] Functional tests
 5. [ ] Doc + Swagger
