@@ -1,0 +1,3 @@
+
+# Health check path
+GET        /health-check        controllers.HealthCheckController.healthCheck()
