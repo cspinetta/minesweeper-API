@@ -1,3 +1,93 @@
 
-# Health check path
-GET        /health-check        controllers.HealthCheckController.healthCheck()
+###
+#  summary: Health check
+#  tags:
+#    - Monitoring
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#        $ref: '#/definitions/controllers.response.HealthCheckResponse'
+###
+GET           /health-check        controllers.HealthCheckController.healthCheck()
+
+###
+#  summary: Create a new player
+#  tags:
+#    - Player
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.PlayerCreationCommand'
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#        $ref: '#/definitions/controllers.response.PlayerResponse'
+#    400:
+#      description: Player cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    409:
+#      description: Player already exists
+#      schema:
+#        $ref: '#/definitions/controllers.response.PlayerResponse'
+#    500:
+#      description: Player cannot be saved
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+POST          /player              controllers.PlayerController.create()
+
+###
+#  summary: Get player information given the id
+#  tags:
+#    - Player
+#  responses:
+#    200:
+#      description: success
+#      schema:
+#        $ref: '#/definitions/controllers.response.PlayerResponse'
+#    400:
+#      description: Player cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Player cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Player cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+GET           /player/:id          controllers.PlayerController.findById(id: Long)
+
+###
+#  summary: Delete a player given the id
+#  tags:
+#    - Player
+#  responses:
+#    204:
+#      description: success
+#    400:
+#      description: Player cannot be deleted
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    500:
+#      description: Player cannot be deleted
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+DELETE        /player/:id          controllers.PlayerController.delete(id: Long)
+
+#POST         /games/new           controllers.HealthCheckController.healthCheck()
+#GET          /games/:id           controllers.HealthCheckController.healthCheck()
+#
+#PATCH        /games/:id           controllers.HealthCheckController.healthCheck()
+
+### NoDocs ###
+GET   /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+
+### NoDocs ###
+GET   /assets/*file                 controllers.Assets.versioned(path="/public", file: Asset)

@@ -1,11 +1,17 @@
 package support.json
 
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 
 import com.github.tototoshi.play2.json4s.Json4s
+import org.json4s.ext.JavaTimeSerializers
 import org.json4s.{DefaultFormats, Extraction, Formats, JValue}
 import play.api.http.{ContentTypeOf, Writeable}
 import play.api.mvc.Codec
+
+object JsonValues {
+  val DateTimeFormat: String = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+}
 
 trait JsonSerializer {
   def extract[T](value: JValue)(implicit mf: Manifest[T]): T
@@ -15,11 +21,10 @@ trait JsonSerializer {
 
 trait Json4SSerializer extends JsonSerializer {
 
-  val formatter: DefaultFormats = new DefaultFormats {
-    override val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-  }
-
-  val formats: Formats = formatter.strict
+  val formats: Formats = (new DefaultFormats {
+    override val dateFormatter: SimpleDateFormat = new SimpleDateFormat(JsonValues.DateTimeFormat)
+  } ++ JavaTimeSerializers.all)
+    .strict
     .withTypeHintFieldName("type")
 
   def extract[T](value: JValue)(implicit mf: Manifest[T]): T = {
