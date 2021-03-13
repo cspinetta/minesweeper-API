@@ -1,3 +1,4 @@
+import controllers.response.ErrorCode
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
@@ -40,9 +41,9 @@ class FunctionalSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport 
       val req = FakeRequest(POST, "/player")
         .withJsonBody(Json.parse(
           s"""
-            |{
-            |  "username": "$playerName"
-            |}
+             |{
+             |  "username": "$playerName"
+             |}
           """.stripMargin))
       val eventualResult = route(app, req).get
 
@@ -58,6 +59,24 @@ class FunctionalSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport 
       status(eventualResult) mustBe Status.OK
       contentType(eventualResult) mustBe Some("application/json")
       contentAsString(eventualResult) must include(playerName)
+    }
+
+    "respond with NotFound when trying to get a nonexistent player" in {
+      val req = FakeRequest(GET, "/player/909090")
+      val eventualResult = route(app, req).get
+
+      status(eventualResult) mustBe Status.NOT_FOUND
+      contentType(eventualResult) mustBe Some("application/json")
+      contentAsString(eventualResult) must include(ErrorCode.NotFound)
+    }
+
+    "respond with BadRequest when trying to get a player with an invalid ID" in {
+      val req = FakeRequest(GET, "/player/a1b2c3")
+      val eventualResult = route(app, req).get
+
+      status(eventualResult) mustBe Status.BAD_REQUEST
+      contentType(eventualResult) mustBe Some("application/json")
+      contentAsString(eventualResult) must include(ErrorCode.ClientError)
     }
 
     "delete player" in {

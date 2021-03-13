@@ -17,7 +17,7 @@ class ErrorHandler extends HttpErrorHandler with Logging {
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     statusCode match {
       case NOT_FOUND => Future.successful(NotFound(Json.toJson(NotFoundResponse(message, ErrorCode.NotFound))))
-      case BAD_REQUEST => Future.successful(NotFound(Json.toJson(BadRequestResponse(message, ErrorCode.ClientError))))
+      case BAD_REQUEST => Future.successful(BadRequest(Json.toJson(BadRequestResponse(message, ErrorCode.ClientError))))
       case _ => Future.successful(Status(statusCode))
     }
   }

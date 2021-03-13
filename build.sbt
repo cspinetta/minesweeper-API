@@ -28,7 +28,7 @@ lazy val root = (project in file("."))
     swaggerDomainNameSpaces := Seq("models", "controllers.response"),
     libraryDependencies ++= Seq(
       guice,
-      "com.h2database" % "h2" % "1.4.199",
+      "com.h2database" % "h2" % "1.4.200",
       "com.github.pureconfig" %% "pureconfig" % "0.14.1",
       "org.typelevel" %% "cats-core" % catsVersion,
       "com.beachape" %% "enumeratum" % "1.6.1",
