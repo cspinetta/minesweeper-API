@@ -1,6 +1,7 @@
 package services
 
 import examples.PlayerExamples
+import models.PlayerCreationCommand
 import org.scalatest.{EitherValues, MustMatchers, fixture}
 import repositories.PlayerRepository
 import scalikejdbc._
@@ -12,8 +13,8 @@ class PlayerServiceSpec extends fixture.FlatSpec with Connection with AutoRollba
   val playerService = new PlayerService(playerRepository)
 
   override def fixture(implicit session: DBSession) {
-    sql"insert into player values (1, 'Alice', NOW(), null)".update.apply()
-    sql"insert into player values (2, 'Bob', NOW(), null)".update.apply()
+    sql"insert into player values (1, 'alice', NOW(), null)".update.apply()
+    sql"insert into player values (2, 'bob', NOW(), null)".update.apply()
   }
 
   behavior of "Player service"
@@ -26,11 +27,22 @@ class PlayerServiceSpec extends fixture.FlatSpec with Connection with AutoRollba
     player.username must be(cmd.username)
   }
 
+  it should "not create a new player when exists another one with the same username" in { implicit session =>
+    val cmd = PlayerCreationCommand(username = "alice")
+    val result = playerService.create(cmd).left.value
+    result must matchPattern { case models.NotUniqueError(_) => }
+  }
+
   it should "fetch a player successfully given an existent ID" in { implicit session =>
     val result = playerService.findById(1)
     val player = result.right.value
     player.id must be(1L)
-    player.username must be("Alice")
+    player.username must be("alice")
+  }
+
+  it should "not fetch result for a nonexistent ID" in { implicit session =>
+    val result = playerService.findById(909090).left.value
+    result must matchPattern { case models.ResourceNotFound(_) => }
   }
 
   it should "mark as deleted a player successfully given an existent ID" in { implicit session =>
