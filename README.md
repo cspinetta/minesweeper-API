@@ -74,5 +74,9 @@ to get an productive MVP with the functionalities required.
 - [ ] Ability to select the game parameters: number of rows, columns, and mines
 - [ ] Ability to support multiple users/accounts
 
+### Basic functional flow
+
+![Basic functional flow](docs/minisweeper_basic-functional-flow.png)
+
 [Scala]: https://www.scala-lang.org/
 [Play framework]: https://www.playframework.com/
