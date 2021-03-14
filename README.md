@@ -9,11 +9,13 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 
 ## API's design and documentation through a Swagger UI
 
-- For localhost:
+![Swagger API Doc](docs/swagger-api-doc.png)
+
+- At localhost:
 
 http://localhost:9000/docs/swagger-ui/index.html?url=/assets/swagger.json#/
 
-- For production:
+- At production:
 
 **TBD**
 
