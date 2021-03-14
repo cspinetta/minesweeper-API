@@ -7,6 +7,18 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 - [Scala] v2.13.x
 - [Play framework] v2.8.x
 
+## API's design and documentation through a Swagger UI
+
+![Swagger API Doc](docs/swagger-api-doc.png)
+
+- At localhost:
+
+http://localhost:9000/docs/swagger-ui/index.html?url=/assets/swagger.json#/
+
+- At production:
+
+**TBD**
+
 ## Development process
 
 ### Unit tests
@@ -46,6 +58,7 @@ sbt clean coverage test coverageReport
 8. [ ] Tracing
 9. [ ] Playground with a docker compose
 10. [ ] Architecture decision record
+11. [ ] Authentication and Authorization
 
 **Note:** the goal is to cover the first 5 points within the next week
 to get an productive MVP with the functionalities required.
@@ -62,6 +75,10 @@ to get an productive MVP with the functionalities required.
 - [ ] Ability to start a new game and preserve/resume the old ones
 - [ ] Ability to select the game parameters: number of rows, columns, and mines
 - [ ] Ability to support multiple users/accounts
+
+### Basic functional flow
+
+![Basic functional flow](docs/minisweeper_basic-functional-flow.png)
 
 [Scala]: https://www.scala-lang.org/
 [Play framework]: https://www.playframework.com/

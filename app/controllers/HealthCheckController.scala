@@ -6,8 +6,7 @@ import javax.inject._
 import play.api.mvc._
 
 /**
- * This controller creates an `Action` to handle HTTP requests to the
- * application's home page.
+ * This controller handles HTTP endpoints for monitoring.
  */
 @Singleton
 class HealthCheckController @Inject()(val controllerComponents: ControllerComponents,

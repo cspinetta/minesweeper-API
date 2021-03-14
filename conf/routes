@@ -1,3 +1,197 @@
 
-# Health check path
-GET        /health-check        controllers.HealthCheckController.healthCheck()
+###
+#  summary: Health check
+#  tags:
+#    - Monitoring
+#  responses:
+#    200:
+#      description: Success
+#      schema:
+#        $ref: '#/definitions/controllers.response.HealthCheckResponse'
+###
+GET           /health-check                 controllers.HealthCheckController.healthCheck()
+
+###
+#  summary: Create a new player
+#  tags:
+#    - Player
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.PlayerCreationCommand'
+#  responses:
+#    200:
+#      description: Success
+#      schema:
+#        $ref: '#/definitions/controllers.response.PlayerResponse'
+#    400:
+#      description: Player cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    409:
+#      description: Player already exists
+#      schema:
+#        $ref: '#/definitions/controllers.response.PlayerResponse'
+#    500:
+#      description: Player cannot be saved
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+POST          /player                       controllers.PlayerController.create()
+
+###
+#  summary: Get player information given the id
+#  tags:
+#    - Player
+#  responses:
+#    200:
+#      description: Success
+#      schema:
+#        $ref: '#/definitions/controllers.response.PlayerResponse'
+#    400:
+#      description: Player cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Player cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Player cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+GET           /player/:id                   controllers.PlayerController.findById(id: Long)
+
+###
+#  summary: Delete a player given the id
+#  tags:
+#    - Player
+#  responses:
+#    204:
+#      description: Success
+#    400:
+#      description: Player cannot be deleted
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    500:
+#      description: Player cannot be deleted
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+DELETE        /player/:id                   controllers.PlayerController.delete(id: Long)
+
+
+###
+#  summary: Create a new game
+#  tags:
+#    - Game
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.GameActions.GameCreationCommand'
+#  responses:
+#    200:
+#      description: A new game is created
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: New game request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    422:
+#      description: Game cannot be created because some provided values are not valid
+#      schema:
+#        $ref: '#/definitions/controllers.response.UnprocessableResponse'
+#    500:
+#      description: Game cannot be created
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+POST          /games                        controllers.GameController.create()
+
+###
+#  summary: Get game information given the id
+#  tags:
+#    - Game
+#  responses:
+#    200:
+#      description: The cell is revealed
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: New game request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Game cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+GET           /games/:id                    controllers.GameController.findById(id: Long)
+
+###
+#  summary: Reveal a cell given the game id and the cell position
+#  tags:
+#    - Game
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.GameActions.RevealCellCommand'
+#  responses:
+#    200:
+#      description: The cell is revealed and the new game state is returned
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: Reveal cell request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game / cell position cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Cell cannot be revealed
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+PATCH         /games/:id/reveal             controllers.GameController.revealCell(id: Long)
+
+###
+#  summary: Add or remove a flag given the game id and the cell position
+#  tags:
+#    - Game
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.GameActions.SetFlagCommand'
+#  responses:
+#    200:
+#      description: The flag is updated and the new game state is returned
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: Set flag request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game / cell position cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Flag cannot be updated
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+PATCH         /games/:id/flag               controllers.GameController.setFlag(id: Long)
+
+### NoDocs ###
+GET           /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
+
+### NoDocs ###
+GET           /assets/*file                 controllers.Assets.versioned(path="/public", file: Asset)
