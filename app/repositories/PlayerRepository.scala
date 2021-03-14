@@ -13,7 +13,7 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class PlayerRepository @Inject()() extends Logging {
 
-  def create(p: PlayerCreationCommand)(implicit session: DBSession = PlayerRepository.autoSession): Either[AppError, Player] = Try {
+  def create(p: PlayerCreationCommand)(implicit session: DBSession): Either[AppError, Player] = Try {
     PlayerRepository.create(p.username)
   } match {
     case Success(value) => Right(value)
@@ -25,7 +25,7 @@ class PlayerRepository @Inject()() extends Logging {
       Left(UnexpectedError("Unexpected error"))
   }
 
-  def deactivate(id: Long)(implicit session: DBSession = PlayerRepository.autoSession): Either[AppError, Unit] = Try {
+  def deactivate(id: Long)(implicit session: DBSession): Either[AppError, Unit] = Try {
     PlayerRepository.deactivate(id)
   } match {
     case Success(_) => Right(())
@@ -34,13 +34,23 @@ class PlayerRepository @Inject()() extends Logging {
       Left(UnexpectedError("Unexpected error"))
   }
 
-  def find(id: Long)(implicit session: DBSession = PlayerRepository.autoSession): Either[AppError, Player] = Try {
+  def find(id: Long)(implicit session: DBSession): Either[AppError, Player] = Try {
     PlayerRepository.findById(id)
   } match {
     case Success(Some(value)) => Right(value)
     case Success(None) => Left(ResourceNotFound(s"player $id not found"))
     case Failure(e) =>
-      logger.error("Error while deactivating player", e)
+      logger.error("Error while finding player", e)
+      Left(UnexpectedError("Unexpected error"))
+  }
+
+  def exists(id: Long)(implicit session: DBSession): Either[AppError, Boolean] = Try {
+    PlayerRepository.findById(id)
+  } match {
+    case Success(Some(_)) => Right(true)
+    case Success(None) => Right(false)
+    case Failure(e) =>
+      logger.error("Error while finding player", e)
       Left(UnexpectedError("Unexpected error"))
   }
 
@@ -51,9 +61,7 @@ object PlayerRepository extends SQLSyntaxSupport[Player] {
   // If the table name is same as snake_case'd name of this companion object, you don't need to specify tableName explicitly.
   override val tableName = "player"
   // By default, column names will be cached from meta data automatically when accessing this table for the first time.
-  override val columns = Seq("id", "username", "created_timestamp", "deleted_timestamp")
-  // If you need mapping between fields and columns, use nameConverters.
-  override val nameConverters = Map("At$" -> "_timestamp")
+  override val columns = Seq("id", "username", "created_at", "deleted_at")
 
   // simple extractor
   def apply(p: SyntaxProvider[Player])(rs: WrappedResultSet): Player = apply(p.resultName)(rs)

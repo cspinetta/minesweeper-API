@@ -5,7 +5,7 @@
 #    - Monitoring
 #  responses:
 #    200:
-#      description: success
+#      description: Success
 #      schema:
 #        $ref: '#/definitions/controllers.response.HealthCheckResponse'
 ###
@@ -21,7 +21,7 @@ GET           /health-check        controllers.HealthCheckController.healthCheck
 #        $ref: '#/definitions/models.PlayerCreationCommand'
 #  responses:
 #    200:
-#      description: success
+#      description: Success
 #      schema:
 #        $ref: '#/definitions/controllers.response.PlayerResponse'
 #    400:
@@ -45,7 +45,7 @@ POST          /player              controllers.PlayerController.create()
 #    - Player
 #  responses:
 #    200:
-#      description: success
+#      description: Success
 #      schema:
 #        $ref: '#/definitions/controllers.response.PlayerResponse'
 #    400:
@@ -69,7 +69,7 @@ GET           /player/:id          controllers.PlayerController.findById(id: Lon
 #    - Player
 #  responses:
 #    204:
-#      description: success
+#      description: Success
 #    400:
 #      description: Player cannot be deleted
 #      schema:
@@ -81,10 +81,114 @@ GET           /player/:id          controllers.PlayerController.findById(id: Lon
 ###
 DELETE        /player/:id          controllers.PlayerController.delete(id: Long)
 
-#POST         /games/new           controllers.HealthCheckController.healthCheck()
-#GET          /games/:id           controllers.HealthCheckController.healthCheck()
-#
-#PATCH        /games/:id           controllers.HealthCheckController.healthCheck()
+
+###
+#  summary: Initialize a new game
+#  tags:
+#    - Game
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.GameActions.GameCreationCommand'
+#  responses:
+#    200:
+#      description: A new game is initialized
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: New game request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    422:
+#      description: Game cannot be initialized because some provided values are not valid
+#      schema:
+#        $ref: '#/definitions/controllers.response.UnprocessableResponse'
+#    500:
+#      description: Game cannot be initialized
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+POST          /games              controllers.GameController.init()
+
+###
+#  summary: Get game information given the id
+#  tags:
+#    - Game
+#  responses:
+#    200:
+#      description: The cell is revealed
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: New game request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Game cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+POST          /games/:id              controllers.GameController.findById(id: Long)
+
+###
+#  summary: Reveal a cell given the game id and the cell position
+#  tags:
+#    - Game
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.GameActions.RevealCellCommand'
+#  responses:
+#    200:
+#      description: The cell is revealed and the new game state is returned
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: Reveal cell request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game / cell position cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Cell cannot be revealed
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+PATCH          /games/:id/reveal              controllers.GameController.revealCell(id: Long)
+
+###
+#  summary: Add or remove a flag given the game id and the cell position
+#  tags:
+#    - Game
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.GameActions.SetFlagCommand'
+#  responses:
+#    200:
+#      description: The flag is updated and the new game state is returned
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: Set flag request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game / cell position cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Flag cannot be updated
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+PATCH          /games/:id/flag              controllers.GameController.setFlag(id: Long)
 
 ### NoDocs ###
 GET   /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)

@@ -29,6 +29,14 @@ object BadRequestResponse {
   implicit val writeBadRequestResponse: Writes[BadRequestResponse] = Json.writes[BadRequestResponse]
 }
 
+case class UnprocessableResponse(message: String, errorCode: String) extends ErrorResponse {
+  val error: String = "unprocessable_entity"
+}
+
+object UnprocessableResponse {
+  implicit val writeUnprocessableResponse: Writes[UnprocessableResponse] = Json.writes[UnprocessableResponse]
+}
+
 case class InternalServerErrorResponse(message: String, errorCode: String) extends ErrorResponse {
   val error: String = "internal_server_error"
 }

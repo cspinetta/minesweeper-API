@@ -1,8 +1,8 @@
 ---
 swagger: "2.0"
 info:
-  title: "Poweramp API"
-  description: "Power your music"
+  title: "Minesweeper API"
+  description: "Play the minesweeper game"
 consumes:
   - application/json
 produces:
