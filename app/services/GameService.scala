@@ -13,9 +13,9 @@ class GameService @Inject()(val playerService: PlayerService, val gameRepository
   def create(cmd: GameCreationCommand)(implicit session: DBSession): Either[AppError, Game] = {
     for {
       _ <- validatePlayerExists(cmd)
-      game <- gameRepository.create(cmd)
-      _ <- cellRepository.create(generateCells(cmd, game.id))
-      game <- gameRepository.find(game.id)
+      game <- gameRepository.create(cmd, GameState.Created)
+//      _ <- cellRepository.create(generateCells(cmd, game.id))
+//      game <- gameRepository.find(game.id)
     } yield game
   }
 
@@ -24,6 +24,7 @@ class GameService @Inject()(val playerService: PlayerService, val gameRepository
   }
 
   def revealCell(id: Long, cmd: RevealCellCommand)(implicit session: DBSession): Either[AppError, Game] = {
+    // generate cells at the first action
     ???
   }
 

@@ -23,24 +23,24 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
   extends ApiController with Logging with TxSupport {
 
   /**
-   * Initialize a new game based on the request body.
+   * Create a new game based on the request body.
    *
-   * @return 200 OK - new game running, otherwise 4XX or 5XX errors.
+   * @return 200 OK - new game created, otherwise 4XX or 5XX errors.
    */
-  def init(): Action[JValue] = Action(json4s.json) { request =>
+  def create(): Action[JValue] = Action(json4s.json) { request =>
     catching(classOf[Exception]).either(request.body.extract[GameCreationCommand]) match {
       case Right(cmd) =>
         withinTx(session => gameService.create(cmd)(session)) match {
           case Right(game) =>
-            logger.info(s"game successfully initialized [id: ${game.id}, player_id: ${game.playerId}, " +
+            logger.info(s"game successfully created [id: ${game.id}, player_id: ${game.playerId}, " +
               s"height: ${game.height}, width: ${game.width}, mines: ${game.mines}]")
             Ok(GameResponse(game).asJson)
           case Left(err: InvalidParametersError) =>
-            logger.error(s"error while initializing a new game. Reason: ${err.reason}", err)
-            UnprocessableEntity(UnprocessableResponse("game cannot be initialized", ErrorCode.ValidationError).asJson)
+            logger.error(s"error while creating a new game. Reason: ${err.reason}", err)
+            UnprocessableEntity(UnprocessableResponse("game cannot be created", ErrorCode.ValidationError).asJson)
           case Left(err) =>
-            logger.error(s"error while initializing a new game. Reason: ${err.reason}", err)
-            InternalServerError(InternalServerErrorResponse("game cannot be initialized", ErrorCode.InternalError).asJson)
+            logger.error(s"error while creating a new game. Reason: ${err.reason}", err)
+            InternalServerError(InternalServerErrorResponse("game cannot be created", ErrorCode.InternalError).asJson)
         }
       case Left(err) =>
         logger.error("new game request cannot be parsed", err)

@@ -7,11 +7,27 @@ import enumeratum._
 import scala.collection.immutable
 
 object GameActions {
+
   case class GameCreationCommand(playerId: Long, height: Int, width: Int, mines: Int)
 
   case class RevealCellCommand(x: Int, y: Int)
 
-  case class SetFlagCommand(x: Int, y: Int, set: Boolean)
+  case class SetFlagCommand(x: Int, y: Int, flag: FlagAction)
+
+  sealed trait FlagAction extends EnumEntry
+
+  object FlagType extends Enum[FlagAction] {
+
+    val values: immutable.IndexedSeq[FlagAction] = findValues
+
+    case object SetQuestion extends FlagAction
+
+    case object SetRed extends FlagAction
+
+    case object Clean extends FlagAction
+
+  }
+
 }
 
 
@@ -36,7 +52,11 @@ sealed trait GameState extends EnumEntry
 object GameState extends Enum[GameState] {
   val values: immutable.IndexedSeq[GameState] = findValues
 
+  case object Created extends GameState
+
   case object Running extends GameState
+
+  case object Paused extends GameState
 
   case object Won extends GameState
 
@@ -64,6 +84,8 @@ object CellState extends Enum[CellState] {
 
   case object Uncovered extends CellState
 
-  case object Flagged extends CellState
+  case object QuestionFlag extends CellState
+
+  case object RedFlag extends CellState
 
 }

@@ -2,9 +2,10 @@ package repositories
 
 import java.sql.ResultSet
 import java.time.ZonedDateTime
+
 import models.GameActions._
 import javax.inject.{Inject, Singleton}
-import models._
+import models.{GameState, _}
 import play.api.Logging
 import scalikejdbc._
 
@@ -13,9 +14,9 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class GameRepository @Inject()() extends Logging {
 
-  def create(cmd: GameCreationCommand)(implicit session: DBSession): Either[AppError, Game] = Try {
+  def create(cmd: GameCreationCommand, state: GameState)(implicit session: DBSession): Either[AppError, Game] = Try {
     val now = ZonedDateTime.now()
-    GameRepository.create(cmd.playerId, now, cmd.height, cmd.width, cmd.mines, now)
+    GameRepository.create(cmd.playerId, state, now, cmd.height, cmd.width, cmd.mines, now)
   } match {
     case Success(value) => Right(value)
     case Failure(e) =>
@@ -86,9 +87,8 @@ object GameRepository extends SQLSyntaxSupport[Game] {
     .map { (game, cells) => game.copy(cells = cells) }
     .single.apply()
 
-  def create(playerId: Long, startTime: ZonedDateTime, height: Int, width: Int, mines: Int,
+  def create(playerId: Long, gameState: GameState, startTime: ZonedDateTime, height: Int, width: Int, mines: Int,
              createdAt: ZonedDateTime = ZonedDateTime.now)(implicit session: DBSession): Game = {
-    val gameState: GameState = GameState.Running
     val id = withSQL {
       insert.into(GameRepository).namedValues(
         column.playerId -> playerId,
