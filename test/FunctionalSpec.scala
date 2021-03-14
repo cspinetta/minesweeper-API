@@ -1,4 +1,5 @@
-import controllers.response.ErrorCode
+import controllers.response.{ErrorCode, PlayerResponse}
+import org.json4s.jackson.JsonMethods
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
@@ -50,15 +51,27 @@ class FunctionalSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport 
       status(eventualResult) mustBe Status.OK
       contentType(eventualResult) mustBe Some("application/json")
       contentAsString(eventualResult) must include("player_1")
+      println("CONTENT" + contentAsString(eventualResult))
     }
 
-    "get last player" in {
-      val req = FakeRequest(GET, "/player/1")
-      val eventualResult = route(app, req).get
+    "get a player" in {
+      val playerName = "player_to_test_get"
+      val reqPost = FakeRequest(POST, "/player")
+        .withJsonBody(Json.parse(
+          s"""
+             |{
+             |  "username": "$playerName"
+             |}
+          """.stripMargin))
+      val postResult = route(app, reqPost).get
+      val newPlayer = JsonMethods.parse(contentAsString(postResult)).extract[PlayerResponse]
 
-      status(eventualResult) mustBe Status.OK
-      contentType(eventualResult) mustBe Some("application/json")
-      contentAsString(eventualResult) must include(playerName)
+      val req = FakeRequest(GET, s"/player/${newPlayer.id}")
+      val result = route(app, req).get
+
+      status(result) mustBe Status.OK
+      contentType(result) mustBe Some("application/json")
+      contentAsString(result) must include(playerName)
     }
 
     "respond with NotFound when trying to get a nonexistent player" in {

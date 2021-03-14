@@ -1,4 +1,4 @@
-create table player (
+create table IF NOT EXISTS player (
   id bigint not null AUTO_INCREMENT,
   username varchar(256) not null,
   created_at timestamp not null,
@@ -7,7 +7,7 @@ create table player (
   constraint player_username_uindex unique (username)
 );
 
-create table game (
+create table IF NOT EXISTS game (
   id bigint not null AUTO_INCREMENT,
   player_id bigint not null,
   state varchar(64) not null,
@@ -22,9 +22,9 @@ create table game (
   FOREIGN KEY (player_id) REFERENCES player(id)
 );
 
-CREATE INDEX idx_game_player_id ON game (player_id);
+CREATE INDEX IF NOT EXISTS idx_game_player_id ON game (player_id);
 
-create table cell (
+create table IF NOT EXISTS cell (
   id bigint not null AUTO_INCREMENT,
   game_id bigint not null,
   x int not null,
@@ -36,4 +36,4 @@ create table cell (
   FOREIGN KEY (game_id) REFERENCES game(id)
 );
 
-CREATE INDEX idx_cell_game_id ON cell (game_id);
+CREATE INDEX IF NOT EXISTS idx_cell_game_id ON cell (game_id);
