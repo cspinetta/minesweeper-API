@@ -30,6 +30,7 @@ lazy val root = (project in file("."))
       guice,
       jdbc,
       "com.h2database" % "h2" % "1.4.200",
+      "org.postgresql" % "postgresql" % "42.2.18",
       "com.github.pureconfig" %% "pureconfig" % "0.14.1",
       "org.typelevel" %% "cats-core" % catsVersion,
       "com.beachape" %% "enumeratum" % "1.6.1",

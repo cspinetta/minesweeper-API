@@ -14,5 +14,5 @@ trait Connection {
     warmUpTime = 100L,
     timeZone = "UTC"
   )
-  ConnectionPool.singleton("jdbc:h2:mem:minesweeper-api;MODE=MYSQL;INIT=RUNSCRIPT FROM 'classpath:scripts/init-db-h2.sql'", "", "", settings)
+  ConnectionPool.singleton("jdbc:h2:mem:minesweeper-api;MODE=MYSQL;INIT=RUNSCRIPT FROM 'classpath:scripts/init-db.sql'", "", "", settings)
 }

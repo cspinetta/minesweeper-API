@@ -1,3 +1,5 @@
+package functional
+
 import controllers.response.{ErrorCode, PlayerResponse}
 import org.json4s.jackson.JsonMethods
 import org.scalatestplus.play.PlaySpec
@@ -9,30 +11,9 @@ import play.api.test.Helpers._
 import support.json.JsonSupport
 
 /**
- * Functional tests start a Play application internally, available
- * as `app`.
+ * Functional tests for Player endpoints.
  */
-class FunctionalSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport {
-
-  "Routes" should {
-    "send 404 on a bad request" in {
-      route(app, FakeRequest(GET, "/boum")).map(status(_)) mustBe Some(NOT_FOUND)
-    }
-
-    "send 200 on a good request" in {
-      route(app, FakeRequest(GET, "/health-check")).map(status(_)) mustBe Some(OK)
-    }
-  }
-
-  "HealthCheckController" should {
-    "check app health" in {
-      val healthCheckResponse = route(app, FakeRequest(GET, "/health-check")).get
-
-      status(healthCheckResponse) mustBe Status.OK
-      contentType(healthCheckResponse) mustBe Some("application/json")
-      contentAsString(healthCheckResponse) must include("OK")
-    }
-  }
+class PlayerFunSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport {
 
   "PlayerController" should {
 
