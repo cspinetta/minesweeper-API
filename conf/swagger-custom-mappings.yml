@@ -15,3 +15,11 @@
   specAsParameter:
     - type: string
       format: date
+- type: models\.GameActions\.CellAction
+  specAsParameter:
+    - type: string
+    - enum:
+      - reveal
+      - set-question-flag
+      - set-red-flag
+      - clean

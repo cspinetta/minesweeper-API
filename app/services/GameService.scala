@@ -57,7 +57,8 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
       _ <- cell.state.transition(CellState.Uncovered)
       boardWalker = doReveal(startedGame, position)
       _ <- boardWalker.updatedCells.toList.traverse(cell => cellRepository.save(cell))
-      updatedGame <- updateGame(boardWalker)
+      _ <- updateGame(boardWalker)
+      updatedGame <- gameRepository.find(gameId)
     } yield updatedGame
   }
 
@@ -71,16 +72,16 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
       Right(())
   }
 
-  private def updateGame(boardWalker: BoardWalker)(implicit session: DBSession): AppResult[Game] = {
+  private def updateGame(boardWalker: BoardWalker)(implicit session: DBSession): AppResult[Unit] = {
     boardWalker.gameProgress match {
       case GameProgressValues.GameLostAndOver =>
         val updatedGame = boardWalker.game.copy(state = GameState.Lost)
-        gameRepository.save(updatedGame).map(_ => updatedGame)
+        gameRepository.save(updatedGame)
       case GameProgressValues.GameWonAndOver =>
         val updatedGame = boardWalker.game.copy(state = GameState.Won)
-        gameRepository.save(updatedGame).map(_ => updatedGame)
+        gameRepository.save(updatedGame)
       case _ =>
-        Right(boardWalker.game)
+        Right(())
     }
   }
 
@@ -145,7 +146,8 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     ) flatMap game.cellByPosition.get
   }
 
-  def traverseBoard(boardWalker: BoardWalker): BoardWalker = {
+  @tailrec
+  final def traverseBoard(boardWalker: BoardWalker): BoardWalker = {
     boardWalker.nextCell match {
       case None => boardWalker
       case Some(cell) =>
@@ -216,7 +218,6 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
 
     (1 to game.mines).foldLeft(Set.empty[Position])((minePositions, _) => putMine(minePositions))
   }
-
 }
 
 object GameService {

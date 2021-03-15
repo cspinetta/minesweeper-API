@@ -23,13 +23,118 @@ TBD
 
 **Or pick a curl:**
 
+* **/health-check**
+
+````shell script
+curl -X GET http://localhost:9000/health-check
+````
+
 * **/players**
 
-TBD
+**Create a new one:**
 
-* **/games** 
+````shell script
+curl --request POST \
+  --url http://localhost:9000/player \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"username": "player_1"
+}'
+````
 
-TBD
+**Get by ID:**
+
+````shell script
+curl -X GET http://localhost:9000/player/2
+````
+
+**Delete by ID:**
+
+````shell script
+curl -X DELETE  http://localhost:9000/player/2
+````
+
+* **/games**
+
+**Create a new one:**
+
+````shell script
+curl --request POST \
+  --url http://localhost:9000/games \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"playerId": 1,
+	"height": 10,
+	"width": 10,
+	"mines": 4
+}'
+````
+
+**Get by ID:**
+
+````shell script
+curl -X GET "http://localhost:9000/games/1"
+````
+
+**Reveal a cell:**
+
+````shell script
+curl --request PATCH \
+  --url http://localhost:9000/games/1 \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"action": "reveal",
+	"position": {
+		"x": 2,
+		"y": 2
+	}
+}'
+````
+
+**Set a question flag:**
+
+````shell script
+curl --request PATCH \
+  --url http://localhost:9000/games/1 \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"action": "set-question-flag",
+	"position": {
+		"x": 2,
+		"y": 2
+	}
+}'
+````
+
+**Set a red flag:**
+
+````shell script
+curl --request PATCH \
+  --url http://localhost:9000/games/1 \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"action": "set-red-flag",
+	"position": {
+		"x": 2,
+		"y": 2
+	}
+}'
+````
+
+**Clean a cell:**
+
+````shell script
+curl --request PATCH \
+  --url http://localhost:9000/games/1 \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"action": "clean",
+	"position": {
+		"x": 2,
+		"y": 2
+	}
+}'
+````
 
 ## Development process
 
