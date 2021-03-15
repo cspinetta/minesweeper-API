@@ -11,7 +11,7 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 
 **You can explore the Swagger UI:**
 
-![Swagger UI](docs/swagger-api-doc.png)
+![Swagger UI](docs/swagger-api-doc_v1.png)
 
 - At localhost:
 
@@ -195,7 +195,7 @@ to get an productive MVP with the functionalities required.
 
 ### Basic functional flow
 
-![Basic functional flow](docs/minisweeper_basic-functional-flow.png)
+![Basic functional flow](docs/minisweeper_basic-functional-flow_v1.png)
 
 [Scala]: https://www.scala-lang.org/
 [Play framework]: https://www.playframework.com/
