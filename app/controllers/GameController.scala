@@ -98,8 +98,8 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
    * @param id game id
    * @return 200 OK - the game if it's found, otherwise 4XX or 5XX errors.
    */
-  def asciiBoard(id: Long, debug: Option[Boolean]): Action[AnyContent] = Action { _ =>
-    withinTx(session => asciiPrinterService.getAsciiBoard(id, debug.getOrElse(false))(session)) match {
+  def boardInASCII(id: Long, debug: Option[Boolean]): Action[AnyContent] = Action { _ =>
+    withinTx(session => asciiPrinterService.getBoardInAscii(id, debug.getOrElse(false))(session)) match {
       case Right(ascii) =>
         Ok(ascii)
       case Left(_: ResourceNotFound) =>

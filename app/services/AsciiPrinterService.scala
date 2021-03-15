@@ -10,7 +10,7 @@ import scalikejdbc.DBSession
 class AsciiPrinterService @Inject()(val appConfigProvider: AppConfigProvider,
                                     val gameService: GameService) extends Logging {
 
-  def getAsciiBoard(gameId: Long, showMines: Boolean)(implicit session: DBSession): AppResult[String] = {
+  def getBoardInAscii(gameId: Long, showMines: Boolean)(implicit session: DBSession): AppResult[String] = {
     for {
       game <- gameService.findById(gameId)
       printer = if (showMines) printForDebugging _ else printForUser _
@@ -51,9 +51,24 @@ class AsciiPrinterService @Inject()(val appConfigProvider: AppConfigProvider,
 object AsciiSymbols {
   def uncovered(adjacentMines: Int): String = s" $adjacentMines "
   val covered: String = " - "
-  val redFlag: String = " F "
+  val redFlag: String = s" ${Character.toString(9873)} " // ⚑
   val questionFlag: String = " ? "
-  val mine: String = " * "
+  val mine: String = s" ${Character.toString(128163)} " // 💣
+
+  /* s must be an even-length string. *//* s must be an even-length string. */
+  def hexStringToByteArray(s: String): Array[Byte] = {
+    val len = s.length
+    val data = new Array[Byte](len / 2)
+    var i = 0
+    while ( {
+      i < len
+    }) {
+      data(i / 2) = ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16)).toByte
+
+      i += 2
+    }
+    data
+  }
 }
 
 

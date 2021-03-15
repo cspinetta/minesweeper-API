@@ -161,7 +161,30 @@ GET           /games/:id                    controllers.GameController.findById(
 #        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
 ###
 PATCH         /games/:id                    controllers.GameController.setCellState(id: Long)
-GET           /games/:id/ascii              controllers.GameController.asciiBoard(id: Long, debug: Option[Boolean])
+
+###
+#  summary: Get ASCII representation of the game board given the id.
+#  tags:
+#    - Game
+#  responses:
+#    200:
+#      description: The board in ASCII representation is returned
+#    400:
+#      description: update cell state request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game / cell position cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Cell cannot be updated
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+#  produces:
+#    - text/plain; charset=UTF-8
+###
+GET           /games/:id/ascii              controllers.GameController.boardInASCII(id: Long, debug: Option[Boolean])
 
 
 ### NoDocs ###
