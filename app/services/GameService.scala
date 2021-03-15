@@ -134,16 +134,7 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
   }
 
   private def neighboursFrom(game: Game, cellPosition: Position): Seq[Cell] = {
-    Seq(
-      cellPosition.nextX,
-      cellPosition.nextX.nextY,
-      cellPosition.nextY,
-      cellPosition.nextY.previousX,
-      cellPosition.previousX,
-      cellPosition.previousX.previousY,
-      cellPosition.previousY,
-      cellPosition.previousY.nextX,
-    ) flatMap game.cellByPosition.get
+    neighboursPosition(cellPosition) flatMap game.cellByPosition.get
   }
 
   @tailrec
@@ -153,13 +144,13 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
       case Some(cell) =>
         if (cell.hasMine) boardWalker.copy(gameProgress = GameProgressValues.GameLostAndOver)
         else {
-          val myNeighbours = neighboursFrom(boardWalker.game, Position(cell))
+          val myVisitableNeighbours = neighboursFrom(boardWalker.game, Position(cell))
             .filterNot(cell => {
               boardWalker.visitedCells.contains(cell.position) || cell.state == CellState.Uncovered
             })
 
-          if (myNeighbours.forall(!_.hasMine)) {
-            val nei: Map[Position, Cell] = boardWalker.visitableNeighbours ++ myNeighbours.map(c => (c.position -> c)) - cell.position
+          if (myVisitableNeighbours.forall(!_.hasMine)) {
+            val nei: Map[Position, Cell] = boardWalker.visitableNeighbours ++ myVisitableNeighbours.map(c => c.position -> c) - cell.position
             val nextCell: Option[Cell] = nei.headOption.map(_._2)
             val newBoard = boardWalker.copy(
               nextCell = nextCell,
@@ -196,13 +187,16 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     for {
       x <- 1 to game.width
       y <- 1 to game.height
-    } yield CellCreationCommand(
-      gameId = game.id,
-      x = x,
-      y = y,
-      hasMine = minePositions.contains(Position(x, y)),
-      hasFlag = false,
-    )
+    } yield {
+      val position = Position(x, y)
+      CellCreationCommand(
+        gameId = game.id,
+        x = x,
+        y = y,
+        hasMine = minePositions.contains(position),
+        adjacentMines = countAdjacentMines(minePositions, position),
+      )
+    }
   }
 
   private def distributeMines(game: Game, firstCellUncovered: Position): Set[Position] = {
@@ -217,6 +211,23 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     }
 
     (1 to game.mines).foldLeft(Set.empty[Position])((minePositions, _) => putMine(minePositions))
+  }
+
+  private def countAdjacentMines(mines: Set[Position], cellPosition: Position): Int = {
+    neighboursPosition(cellPosition) count mines.contains
+  }
+
+  private def neighboursPosition(cellPosition: Position) = {
+    Seq(
+      cellPosition.nextX,
+      cellPosition.nextX.nextY,
+      cellPosition.nextY,
+      cellPosition.nextY.previousX,
+      cellPosition.previousX,
+      cellPosition.previousX.previousY,
+      cellPosition.previousY,
+      cellPosition.previousY.nextX,
+    )
   }
 }
 

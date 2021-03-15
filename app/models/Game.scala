@@ -98,9 +98,9 @@ object Position {
   def apply(cell: Cell): Position = Position(cell.x, cell.y)
 }
 
-case class CellCreationCommand(gameId: Long, x: Int, y: Int, hasMine: Boolean, hasFlag: Boolean)
+case class CellCreationCommand(gameId: Long, x: Int, y: Int, hasMine: Boolean, adjacentMines: Int)
 
-case class Cell(id: Long, gameId: Long, x: Int, y: Int, state: CellState, hasMine: Boolean, hasFlag: Boolean) {
+case class Cell(id: Long, gameId: Long, x: Int, y: Int, state: CellState, hasMine: Boolean, adjacentMines: Int) {
   def position: Position = Position(this)
 }
 

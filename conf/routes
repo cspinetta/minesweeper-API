@@ -161,6 +161,7 @@ GET           /games/:id                    controllers.GameController.findById(
 #        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
 ###
 PATCH         /games/:id                    controllers.GameController.setCellState(id: Long)
+GET           /games/:id/ascii              controllers.GameController.asciiBoard(id: Long, debug: Option[Boolean])
 
 
 ### NoDocs ###

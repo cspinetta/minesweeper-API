@@ -37,7 +37,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
   import cellBinders._
 
   override val tableName = "cell"
-  override val columns = Seq("id", "game_id", "x", "y", "state", "has_mine", "has_flag")
+  override val columns = Seq("id", "game_id", "x", "y", "state", "has_mine", "adjacent_mines")
 
   def apply(p: SyntaxProvider[Cell])(rs: WrappedResultSet): Cell = apply(p.resultName)(rs)
 
@@ -48,7 +48,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
     y = rs.get(p.y),
     state = rs.get(p.state),
     hasMine = rs.get(p.hasMine),
-    hasFlag = rs.get(p.hasFlag))
+    adjacentMines = rs.get(p.adjacentMines))
 
   def opt(s: SyntaxProvider[Cell])(rs: WrappedResultSet): Option[Cell] = rs.longOpt(s.resultName.id).map(_ => apply(s.resultName)(rs))
 
@@ -56,7 +56,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
 
   def create(cells: Seq[CellCreationCommand])(implicit session: DBSession): Seq[Int] = {
     val batchParams: Seq[Seq[Any]] = cells.foldLeft(Seq.empty[Seq[Any]])((seq, cell) =>
-      seq :+ Seq(cell.gameId, cell.x, cell.y, CellState.Covered.toString, cell.hasMine, cell.hasFlag))
+      seq :+ Seq(cell.gameId, cell.x, cell.y, CellState.Covered.toString, cell.hasMine, cell.adjacentMines))
     withSQL {
       insert.into(CellRepository).namedValues(
         column.gameId -> sqls.?,
@@ -64,7 +64,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
         column.y -> sqls.?,
         column.state -> sqls.?,
         column.hasMine -> sqls.?,
-        column.hasFlag -> sqls.?,
+        column.adjacentMines -> sqls.?,
       )
     }.batch(batchParams: _*).apply()
   }
@@ -76,7 +76,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
         column.y -> cell.y,
         column.state -> cell.state,
         column.hasMine -> cell.hasMine,
-        column.hasFlag -> cell.hasFlag)
+        column.adjacentMines -> cell.adjacentMines)
         .where.eq(column.id, cell.id)
     }.update.apply()
   }

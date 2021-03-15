@@ -8,7 +8,7 @@ import models.{InvalidParametersError, ResourceNotFound}
 import org.json4s.JValue
 import play.api.Logging
 import play.api.mvc._
-import services.GameService
+import services.{AsciiPrinterService, GameService}
 import support.db.TxSupport
 
 import scala.util.control.Exception.catching
@@ -19,6 +19,7 @@ import scala.util.control.Exception.catching
 @Singleton
 class GameController @Inject()(val controllerComponents: ControllerComponents,
                                val gameService: GameService,
+                               val asciiPrinterService: AsciiPrinterService,
                                val json4s: Json4s)
   extends ApiController with Logging with TxSupport {
 
@@ -88,6 +89,24 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
       case Left(err) =>
         logger.error("set cell request cannot be parsed", err)
         BadRequest(BadRequestResponse("set cell request cannot be parsed", ErrorCode.ValidationError).asJson)
+    }
+  }
+
+  /**
+   * Get ASCII representation of the game board given the id.
+   *
+   * @param id game id
+   * @return 200 OK - the game if it's found, otherwise 4XX or 5XX errors.
+   */
+  def asciiBoard(id: Long, debug: Option[Boolean]): Action[AnyContent] = Action { _ =>
+    withinTx(session => asciiPrinterService.getAsciiBoard(id, debug.getOrElse(false))(session)) match {
+      case Right(ascii) =>
+        Ok(ascii)
+      case Left(_: ResourceNotFound) =>
+        NotFound(NotFoundResponse("Game cannot be found", ErrorCode.NotFound).asJson)
+      case Left(err) =>
+        logger.error(s"Error while generating ASCII game. Reason: ${err.reason}", err)
+        InternalServerError(InternalServerErrorResponse("Game ASCII cannot be generated", ErrorCode.InternalError).asJson)
     }
   }
 }

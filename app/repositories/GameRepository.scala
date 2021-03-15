@@ -28,7 +28,7 @@ class GameRepository @Inject()() extends Logging {
     GameRepository.save(game)
   } match {
     case Success(affectedRows) if affectedRows > 0 => Right(())
-    case Success(affectedRows) if affectedRows <= 0 => Left(UnexpectedError("Unexpected error. No affected rows when trying to update a game"))
+    case Success(affectedRows) => Left(UnexpectedError("Unexpected error. No affected rows when trying to update a game"))
     case Failure(e) =>
       logger.error(s"Error while saving a game [id: ${game.id}]", e)
       Left(UnexpectedError("Unexpected error"))
