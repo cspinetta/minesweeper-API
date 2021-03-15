@@ -7,7 +7,7 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 - [Scala] v2.13.x
 - [Play framework] v2.8.x
 
-## API's design and documentation through a Swagger UI
+## API documentation
 
 ![Swagger API Doc](docs/swagger-api-doc.png)
 
@@ -52,7 +52,7 @@ sbt clean coverage test coverageReport
 2. [x] Release and Deployment process
 3. [ ] Core functionalities (listed below)
 4. [ ] Functional tests
-5. [ ] Doc + Swagger
+5. [x] Doc + Swagger
 6. [ ] Contextual logging
 7. [ ] Metrics
 8. [ ] Tracing
@@ -67,14 +67,14 @@ to get an productive MVP with the functionalities required.
 
 - [x] Design and implement a documented RESTful API for the game (think of a mobile app for your API)
 - [ ] Implement an API client library for the API designed above. Ideally, in a different language, of your preference, to the one used for the API
-- [ ] When a cell with no adjacent mines is revealed, all adjacent squares will be revealed (and repeat)
+- [x] When a cell with no adjacent mines is revealed, all adjacent squares will be revealed (and repeat)
 - [ ] Ability to 'flag' a cell with a question mark or red flag
-- [ ] Detect when game is over
+- [x] Detect when game is over
 - [x] Persistence
 - [x] Time tracking
-- [ ] Ability to start a new game and preserve/resume the old ones
+- [x] Ability to start a new game and preserve/resume the old ones
 - [x] Ability to select the game parameters: number of rows, columns, and mines
-- [ ] Ability to support multiple users/accounts
+- [x] Ability to support multiple users/accounts
 
 ### Basic functional flow
 
