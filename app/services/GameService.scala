@@ -45,7 +45,9 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
   def updateCellState(gameId: Long, cmd: SetCellStateCommand)(implicit session: DBSession): AppResult[Game] = {
     cmd.action match {
       case CellAction.Reveal => revealCell(gameId, cmd.position)
-      case _ => Left(UnexpectedError("Not implemented yet"))
+      case CellAction.SetRedFlag => updateFlag(gameId, cmd, CellState.RedFlag)
+      case CellAction.SetQuestionFlag => updateFlag(gameId, cmd, CellState.QuestionFlag)
+      case CellAction.Clean => updateFlag(gameId, cmd, CellState.Covered)
     }
   }
 
@@ -53,11 +55,22 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     for {
       initialGame <- gameRepository.find(gameId)
       startedGame <- checkGameState(initialGame, position)
-      cell <- validateRevealCellPosition(startedGame, position)
+      cell <- validateCellPosition(startedGame, position)
       _ <- cell.state.transition(CellState.Uncovered)
       boardWalker = doReveal(startedGame, position)
       _ <- boardWalker.updatedCells.toList.traverse(cell => cellRepository.save(cell))
       _ <- updateGame(boardWalker)
+      updatedGame <- gameRepository.find(gameId)
+    } yield updatedGame
+  }
+
+  def updateFlag(gameId: Long, cmd: SetCellStateCommand, newCellState: CellState)(implicit session: DBSession): AppResult[Game] = {
+    for {
+      initialGame <- gameRepository.find(gameId)
+      startedGame <- checkGameState(initialGame, cmd.position)
+      cell <- validateCellPosition(startedGame, cmd.position)
+      _ <- cell.state.transition(newCellState)
+      _ <- cellRepository.save(cell.copy(state = newCellState))
       updatedGame <- gameRepository.find(gameId)
     } yield updatedGame
   }
@@ -85,7 +98,7 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     }
   }
 
-  private def validateRevealCellPosition(game: Game, position: Position): AppResult[Cell] = {
+  private def validateCellPosition(game: Game, position: Position): AppResult[Cell] = {
     game.cellByPosition
       .get(position)
       .toRight(ClientError(s"invalid position. Game limit: [x: ${game.width}, y: ${game.height}]"))
@@ -148,28 +161,19 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
             .filterNot(cell => {
               boardWalker.visitedCells.contains(cell.position) || cell.state == CellState.Uncovered
             })
-
-          if (myVisitableNeighbours.forall(!_.hasMine)) {
-            val nei: Map[Position, Cell] = boardWalker.visitableNeighbours ++ myVisitableNeighbours.map(c => c.position -> c) - cell.position
-            val nextCell: Option[Cell] = nei.headOption.map(_._2)
-            val newBoard = boardWalker.copy(
-              nextCell = nextCell,
-              visitableNeighbours = nextCell.map(cell => nei - cell.position).getOrElse(nei),
-              visitedCells = nextCell.map(cell => boardWalker.visitedCells + (cell.position -> cell)).getOrElse(boardWalker.visitedCells),
-              updatedCells = boardWalker.updatedCells :+ cell.copy(state = CellState.Uncovered)
-            )
-            traverseBoard(newBoard)
+          val nextVisitableNeighbours: Map[Position, Cell] = if (myVisitableNeighbours.forall(!_.hasMine)) {
+            boardWalker.visitableNeighbours ++ myVisitableNeighbours.map(c => c.position -> c) - cell.position
           } else {
-            val nei: Map[Position, Cell] = boardWalker.visitableNeighbours - cell.position
-            val nextCell: Option[Cell] = nei.headOption.map(_._2)
-            val newBoard = boardWalker.copy(
-              nextCell = nextCell,
-              visitableNeighbours = nextCell.map(cell => nei - cell.position).getOrElse(nei),
-              visitedCells = nextCell.map(cell => boardWalker.visitedCells + (cell.position -> cell)).getOrElse(boardWalker.visitedCells),
-              updatedCells = boardWalker.updatedCells :+ cell.copy(state = CellState.Uncovered)
-            )
-            traverseBoard(newBoard)
+            boardWalker.visitableNeighbours - cell.position
           }
+          val nextCell: Option[Cell] = nextVisitableNeighbours.headOption.map(_._2)
+          val newBoard = boardWalker.copy(
+            nextCell = nextCell,
+            visitableNeighbours = nextCell.map(cell => nextVisitableNeighbours - cell.position).getOrElse(nextVisitableNeighbours),
+            visitedCells = nextCell.map(cell => boardWalker.visitedCells + (cell.position -> cell)).getOrElse(boardWalker.visitedCells),
+            updatedCells = boardWalker.updatedCells :+ cell.copy(state = CellState.Uncovered)
+          )
+          traverseBoard(newBoard)
         }
     }
   }

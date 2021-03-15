@@ -19,14 +19,14 @@ class AsciiPrinterService @Inject()(val appConfigProvider: AppConfigProvider,
 
   def generateBoard(game: Game, printer: Cell => String): String = {
     val matrix = Array.ofDim[Cell](game.width, game.height)
-    game.cells.foreach(cell => matrix(cell.x - 1)(cell.y - 1) = cell)
+    game.cells.foreach(cell => matrix(cell.y - 1)(cell.x - 1) = cell)
     val ascii = new StringBuilder("")
     for {
-      (row, i) <- matrix.zipWithIndex
-      (cell, j) <- row.zipWithIndex
+      (row, rowIndex) <- matrix.zipWithIndex
+      (cell, collIndex) <- row.zipWithIndex
     } {
       ascii ++= printer(cell)
-      if (j == game.height - 1 && i < game.width - 1)
+      if (collIndex == game.height - 1 && rowIndex < game.width - 1)
         ascii ++= System.lineSeparator
     }
     ascii.toString()
@@ -50,6 +50,7 @@ class AsciiPrinterService @Inject()(val appConfigProvider: AppConfigProvider,
 
 object AsciiSymbols {
   def uncovered(adjacentMines: Int): String = s" $adjacentMines "
+
   val covered: String = " - "
   val redFlag: String = s" ${Character.toString(9873)} " // ⚑
   val questionFlag: String = " ? "

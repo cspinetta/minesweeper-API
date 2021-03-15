@@ -20,9 +20,9 @@ object GameActions {
 
     case object Reveal extends CellAction("reveal")
 
-    case object SetQuestion extends CellAction("set-question-flag")
+    case object SetQuestionFlag extends CellAction("set-question-flag")
 
-    case object SetRed extends CellAction("set-red-flag")
+    case object SetRedFlag extends CellAction("set-red-flag")
 
     case object Clean extends CellAction("clean")
 
