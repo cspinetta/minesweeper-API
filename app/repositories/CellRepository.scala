@@ -20,6 +20,16 @@ class CellRepository @Inject()() extends Logging {
       logger.error("Error while saving new cells", e)
       Left(UnexpectedError("Unexpected error"))
   }
+
+  def save(cell: Cell)(implicit session: DBSession): Either[AppError, Unit] = Try {
+    CellRepository.save(cell)
+  } match {
+    case Success(affectedRows) if affectedRows > 0 => Right(())
+    case Success(affectedRows) if affectedRows <= 0 => Left(UnexpectedError("Unexpected error. No affected rows when trying to update a cell"))
+    case Failure(e) =>
+      logger.error(s"Error while saving a cell [id: ${cell.id}]", e)
+      Left(UnexpectedError("Unexpected error"))
+  }
 }
 
 object CellRepository extends SQLSyntaxSupport[Cell] {
@@ -57,6 +67,18 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
         column.hasFlag -> sqls.?,
       )
     }.batch(batchParams: _*).apply()
+  }
+
+  def save(cell: Cell)(implicit session: DBSession): Int = {
+    withSQL {
+      update(CellRepository).set(
+        column.x -> cell.x,
+        column.y -> cell.y,
+        column.state -> cell.state,
+        column.hasMine -> cell.hasMine,
+        column.hasFlag -> cell.hasFlag)
+        .where.eq(column.id, cell.id)
+    }.update.apply()
   }
 
   object cellBinders {

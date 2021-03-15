@@ -24,6 +24,16 @@ class GameRepository @Inject()() extends Logging {
       Left(UnexpectedError("Unexpected error"))
   }
 
+  def save(game: Game)(implicit session: DBSession): Either[AppError, Unit] = Try {
+    GameRepository.save(game)
+  } match {
+    case Success(affectedRows) if affectedRows > 0 => Right(())
+    case Success(affectedRows) if affectedRows <= 0 => Left(UnexpectedError("Unexpected error. No affected rows when trying to update a game"))
+    case Failure(e) =>
+      logger.error(s"Error while saving a game [id: ${game.id}]", e)
+      Left(UnexpectedError("Unexpected error"))
+  }
+
   def deactivate(id: Long)(implicit session: DBSession): Either[AppError, Unit] = Try {
     GameRepository.deactivate(id)
   } match {
@@ -110,6 +120,19 @@ object GameRepository extends SQLSyntaxSupport[Game] {
       mines = mines,
       cells = List.empty,
       createdAt = createdAt)
+  }
+
+  def save(game: Game)(implicit session: DBSession): Int = {
+    withSQL {
+      update(GameRepository).set(
+        column.playerId -> game.playerId,
+        column.state -> game.state,
+        column.startTime -> game.startTime,
+        column.height -> game.height,
+        column.width -> game.width,
+        column.mines -> game.mines)
+        .where.eq(column.id, game.id)
+    }.update.apply()
   }
 
   def deactivate(id: Long)(implicit session: DBSession): Unit = withSQL {

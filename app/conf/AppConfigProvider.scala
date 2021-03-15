@@ -1,6 +1,7 @@
 package conf
 
 import com.typesafe.config.Config
+import conf.AppConfig.values.GameConfig
 import javax.inject.{Inject, Singleton}
 import play.api.{ConfigLoader, Configuration}
 
@@ -11,7 +12,7 @@ class AppConfigProvider @Inject()(val config: Configuration) {
   val app: AppConfig = config.get[AppConfig](path = "app")
 }
 
-case class AppConfig(environment: String)
+case class AppConfig(environment: String, game: GameConfig)
 
 object AppConfig {
   // DO NOT REMOVE THIS IMPORT
@@ -25,5 +26,8 @@ object AppConfig {
 
   object values {
 
+    case class GameConfig(maxHeight: Int, maxWidth: Int)
+
   }
+
 }

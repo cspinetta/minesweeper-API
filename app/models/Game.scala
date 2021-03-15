@@ -47,16 +47,36 @@ case class Game(id: Long,
   }
 }
 
-sealed trait GameState extends EnumEntry
+sealed trait GameState extends EnumEntry with MachineStateSupport {
+  type S = GameState
+}
 
 object GameState extends Enum[GameState] {
   val values: immutable.IndexedSeq[GameState] = findValues
 
-  case object Created extends GameState
+  case object Created extends GameState {
+    override def transition(nextState: GameState): AppResult[GameState] = nextState match {
+      case Running => Right(nextState)
+      case _ =>
+        super.transition(nextState)
+    }
+  }
 
-  case object Running extends GameState
+  case object Running extends GameState {
+    override def transition(nextState: GameState): AppResult[GameState] = nextState match {
+      case Paused => Right(nextState)
+      case _ =>
+        super.transition(nextState)
+    }
+  }
 
-  case object Paused extends GameState
+  case object Paused extends GameState {
+    override def transition(nextState: GameState): AppResult[GameState] = nextState match {
+      case Running => Right(nextState)
+      case _ =>
+        super.transition(nextState)
+    }
+  }
 
   case object Won extends GameState
 
@@ -64,7 +84,12 @@ object GameState extends Enum[GameState] {
 
 }
 
-case class Position(x: Int, y: Int)
+case class Position(x: Int, y: Int) {
+  def nextX: Position = this.copy(x = x + 1)
+  def nextY: Position = this.copy(y = y + 1)
+  def previousX: Position = this.copy(x = x - 1)
+  def previousY: Position = this.copy(y = y - 1)
+}
 
 object Position {
   def apply(cell: Cell): Position = Position(cell.x, cell.y)
@@ -72,20 +97,51 @@ object Position {
 
 case class CellCreationCommand(gameId: Long, x: Int, y: Int, hasMine: Boolean, hasFlag: Boolean)
 
-case class Cell(id: Long, gameId: Long, x: Int, y: Int, state: CellState, hasMine: Boolean, hasFlag: Boolean)
+case class Cell(id: Long, gameId: Long, x: Int, y: Int, state: CellState, hasMine: Boolean, hasFlag: Boolean) {
+  def position: Position = Position(this)
+}
 
-sealed trait CellState extends EnumEntry
+sealed trait CellState extends EnumEntry with MachineStateSupport {
+  type S = CellState
+}
 
 object CellState extends Enum[CellState] {
 
   val values: immutable.IndexedSeq[CellState] = findValues
 
-  case object Covered extends CellState
+  case object Covered extends CellState {
+    override def transition(nextState: CellState): AppResult[CellState] = nextState match {
+      case Uncovered | QuestionFlag | RedFlag => Right(nextState)
+      case _ =>
+        super.transition(nextState)
+    }
+  }
 
   case object Uncovered extends CellState
 
-  case object QuestionFlag extends CellState
+  case object QuestionFlag extends CellState {
+    override def transition(nextState: CellState): AppResult[CellState] = nextState match {
+      case Covered | Uncovered | RedFlag => Right(nextState)
+      case _ =>
+        super.transition(nextState)
+    }
+  }
 
-  case object RedFlag extends CellState
+  case object RedFlag extends CellState {
+    override def transition(nextState: CellState): AppResult[CellState] = nextState match {
+      case Covered | Uncovered | QuestionFlag => Right(nextState)
+      case _ =>
+        super.transition(nextState)
+    }
+  }
 
+}
+
+trait MachineStateSupport {
+  type S
+
+  def transition(nextState: S): AppResult[S] = {
+    val msg = s"Invalid transition from state ${this.toString} to ${nextState.toString}"
+    Left(InvalidStateTransitionError(msg))
+  }
 }
