@@ -160,7 +160,7 @@ GET           /games/:id                    controllers.GameController.findById(
 #      schema:
 #        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
 ###
-PATCH         /games/:id/reveal             controllers.GameController.setCellState(id: Long)
+PATCH         /games/:id                    controllers.GameController.setCellState(id: Long)
 
 
 ### NoDocs ###

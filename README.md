@@ -9,7 +9,7 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 
 ## API
 
-**You can navigate a Swaggr UI:**
+**You can explore the Swagger UI:**
 
 ![Swagger UI](docs/swagger-api-doc.png)
 
@@ -63,16 +63,16 @@ sbt clean coverage test coverageReport
 1. [x] Initial Setup
 2. [x] Release and Deployment process
 3. [ ] Core functionalities (listed below)
-4. [ ] Functional tests
-5. [x] Doc + Swagger
-6. [ ] Contextual logging
-7. [ ] Metrics
-8. [ ] Tracing
-9. [ ] Playground with a docker compose
-10. [ ] Architecture decision record
-11. [ ] Authentication and Authorization
+4. [ ] Authentication and Authorization
+5. [ ] Functional tests
+6. [x] Doc + Swagger
+7. [ ] Contextual logging
+8. [ ] Metrics
+9. [ ] Tracing
+10. [ ] Playground with a docker compose
+11. [ ] Architecture decision record
 
-**Note:** the goal is to cover the first 5 points within the next week
+**Note:** the goal is to cover the first 6 points within the next week
 to get an productive MVP with the functionalities required.
 
 ### Core functionalities
