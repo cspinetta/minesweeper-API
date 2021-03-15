@@ -42,20 +42,23 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     } yield updatedGame
   }
 
-  def revealCell(id: Long, cmd: RevealCellCommand)(implicit session: DBSession): AppResult[Game] = {
+  def updateCellState(gameId: Long, cmd: SetCellStateCommand)(implicit session: DBSession): AppResult[Game] = {
+    cmd.action match {
+      case CellAction.Reveal => revealCell(gameId, cmd.position)
+      case _ => Left(UnexpectedError("Not implemented yet"))
+    }
+  }
+
+  def revealCell(gameId: Long, position: Position)(implicit session: DBSession): AppResult[Game] = {
     for {
-      initialGame <- gameRepository.find(id)
-      startedGame <- checkGameState(initialGame, cmd)
-      cell <- validateRevealCellPosition(startedGame, cmd)
+      initialGame <- gameRepository.find(gameId)
+      startedGame <- checkGameState(initialGame, position)
+      cell <- validateRevealCellPosition(startedGame, position)
       _ <- cell.state.transition(CellState.Uncovered)
-      boardWalker = doReveal(startedGame, cmd)
+      boardWalker = doReveal(startedGame, position)
       _ <- boardWalker.updatedCells.toList.traverse(cell => cellRepository.save(cell))
       updatedGame <- updateGame(boardWalker)
     } yield updatedGame
-  }
-
-  def setFlag(id: Long, cmd: SetFlagCommand)(implicit session: DBSession): AppResult[Game] = {
-    ???
   }
 
   private def validateGameCreationCommand(cmd: GameCreationCommand): AppResult[Unit] = {
@@ -81,14 +84,14 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     }
   }
 
-  private def validateRevealCellPosition(game: Game, cmd: RevealCellCommand): AppResult[Cell] = {
+  private def validateRevealCellPosition(game: Game, position: Position): AppResult[Cell] = {
     game.cellByPosition
-      .get(Position(cmd.x, cmd.y))
+      .get(position)
       .toRight(ClientError(s"invalid position. Game limit: [x: ${game.width}, y: ${game.height}]"))
   }
 
-  private def checkGameState(game: Game, cmd: RevealCellCommand)(implicit session: DBSession): AppResult[Game] = game.state match {
-    case GameState.Created => initGame(game, Position(cmd.x, cmd.y))
+  private def checkGameState(game: Game, position: Position)(implicit session: DBSession): AppResult[Game] = game.state match {
+    case GameState.Created => initGame(game, position)
     case GameState.Running => Right(game)
     case GameState.Paused => resumeGame(game)
     case GameState.Lost | GameState.Won => Left(ClientError("try to perform an action against a finished game"))
@@ -111,8 +114,8 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     } yield game
   }
 
-  private def doReveal(game: Game, cmd: RevealCellCommand): BoardWalker = {
-    val cell = game.cellByPosition(Position(cmd.x, cmd.y))
+  private def doReveal(game: Game, position: Position): BoardWalker = {
+    val cell = game.cellByPosition(position)
     val walker = BoardWalker(
       game = game,
       nextCell = Some(cell),

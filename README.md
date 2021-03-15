@@ -7,9 +7,11 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 - [Scala] v2.13.x
 - [Play framework] v2.8.x
 
-## API documentation
+## API
 
-![Swagger API Doc](docs/swagger-api-doc.png)
+**You can navigate a Swaggr UI:**
+
+![Swagger UI](docs/swagger-api-doc.png)
 
 - At localhost:
 
@@ -17,7 +19,17 @@ http://localhost:9000/docs/swagger-ui/index.html?url=/assets/swagger.json#/
 
 - At production:
 
-**TBD**
+TBD
+
+**Or pick a curl:**
+
+* **/players**
+
+TBD
+
+* **/games** 
+
+TBD
 
 ## Development process
 

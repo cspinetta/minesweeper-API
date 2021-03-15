@@ -67,52 +67,27 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
   }
 
   /**
-   * Reveal a cell given the game id and the cell position.
-   *
-   * @return 200 OK - the cell is revealed, otherwise 4XX or 5XX errors.
-   */
-  def revealCell(id: Long): Action[JValue] = Action(json4s.json) { request =>
-    catching(classOf[Exception]).either(request.body.extract[RevealCellCommand]) match {
-      case Right(cmd) =>
-        withinTx(session => gameService.revealCell(id, cmd)(session)) match {
-          case Right(game) =>
-            logger.debug(s"game successfully updated [id: ${game.id}, player_id: ${game.playerId}, " +
-              s"RevealCellCommand: $cmd]")
-            Ok(GameResponse(game).asJson)
-          case Left(_: ResourceNotFound) =>
-            NotFound(NotFoundResponse("Game / cell position cannot be found", ErrorCode.NotFound).asJson)
-          case Left(err) =>
-            logger.error(s"error while revealing a cell. Reason: ${err.reason}", err)
-            InternalServerError(InternalServerErrorResponse("cell cannot be revealed", ErrorCode.InternalError).asJson)
-        }
-      case Left(err) =>
-        logger.error("reveal cell request cannot be parsed", err)
-        BadRequest(BadRequestResponse("reveal cell request cannot be parsed", ErrorCode.ValidationError).asJson)
-    }
-  }
-
-  /**
-   * Add or remove a flag given the game id and the cell position.
+   * Update cell state given the game id, the cell position and the desired new state.
    *
    * @return 200 OK - the flag is added, otherwise 4XX or 5XX errors.
    */
-  def setFlag(id: Long): Action[JValue] = Action(json4s.json) { request =>
-    catching(classOf[Exception]).either(request.body.extract[SetFlagCommand]) match {
+  def setCellState(id: Long): Action[JValue] = Action(json4s.json) { request =>
+    catching(classOf[Exception]).either(request.body.extract[SetCellStateCommand]) match {
       case Right(cmd) =>
-        withinTx(session => gameService.setFlag(id, cmd)(session)) match {
+        withinTx(session => gameService.updateCellState(id, cmd)(session)) match {
           case Right(game) =>
             logger.debug(s"game successfully updated [id: ${game.id}, player_id: ${game.playerId}, " +
-              s"SetFlagCommand: $cmd]")
+              s"SetCellCommand: $cmd]")
             Ok(GameResponse(game).asJson)
           case Left(_: ResourceNotFound) =>
             NotFound(NotFoundResponse("Game / cell position cannot be found", ErrorCode.NotFound).asJson)
           case Left(err) =>
-            logger.error(s"error while updating a flag. Reason: ${err.reason}", err)
-            InternalServerError(InternalServerErrorResponse("flag cannot be updated", ErrorCode.InternalError).asJson)
+            logger.error(s"error while updating a cell. Reason: ${err.reason}", err)
+            InternalServerError(InternalServerErrorResponse("cell cannot be updated", ErrorCode.InternalError).asJson)
         }
       case Left(err) =>
-        logger.error("set flag request cannot be parsed", err)
-        BadRequest(BadRequestResponse("set flag request cannot be parsed", ErrorCode.ValidationError).asJson)
+        logger.error("set cell request cannot be parsed", err)
+        BadRequest(BadRequestResponse("set cell request cannot be parsed", ErrorCode.ValidationError).asJson)
     }
   }
 }

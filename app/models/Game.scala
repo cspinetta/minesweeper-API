@@ -10,21 +10,21 @@ object GameActions {
 
   case class GameCreationCommand(playerId: Long, height: Int, width: Int, mines: Int)
 
-  case class RevealCellCommand(x: Int, y: Int)
+  case class SetCellStateCommand(action: CellAction, position: Position)
 
-  case class SetFlagCommand(x: Int, y: Int, flag: FlagAction)
+  sealed abstract class CellAction(override val entryName: String) extends EnumEntry
 
-  sealed trait FlagAction extends EnumEntry
+  object CellAction extends Enum[CellAction] {
 
-  object FlagType extends Enum[FlagAction] {
+    val values: immutable.IndexedSeq[CellAction] = findValues
 
-    val values: immutable.IndexedSeq[FlagAction] = findValues
+    case object Reveal extends CellAction("reveal")
 
-    case object SetQuestion extends FlagAction
+    case object SetQuestion extends CellAction("set-question-flag")
 
-    case object SetRed extends FlagAction
+    case object SetRed extends CellAction("set-red-flag")
 
-    case object Clean extends FlagAction
+    case object Clean extends CellAction("clean")
 
   }
 
@@ -86,8 +86,11 @@ object GameState extends Enum[GameState] {
 
 case class Position(x: Int, y: Int) {
   def nextX: Position = this.copy(x = x + 1)
+
   def nextY: Position = this.copy(y = y + 1)
+
   def previousX: Position = this.copy(x = x - 1)
+
   def previousY: Position = this.copy(y = y - 1)
 }
 
