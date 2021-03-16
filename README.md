@@ -181,25 +181,26 @@ sbt clean coverage test coverageReport
 
 1. [x] Initial Setup
 2. [x] Release and Deployment process
-3. [ ] Core functionalities (listed below)
-4. [ ] Authentication and Authorization
-5. [ ] Functional tests
+3. [x] Core functionalities (listed below)
+4. [x] Authentication
+5. [x] Functional tests
 6. [x] Doc + Swagger
-7. [ ] Contextual logging
-8. [ ] Metrics
-9. [ ] Tracing
-10. [ ] Playground with a docker compose
-11. [ ] Architecture decision record
+7. [ ] Release MVP in a platform
+8. [ ] Contextual logging
+9. [ ] Metrics
+10. [ ] Tracing
+11. [ ] Playground with a docker compose
+12. [ ] Architecture decision record
 
-**Note:** the goal is to cover the first 6 points within the next week
-to get an productive MVP with the functionalities required.
+**Note:** the goal is to cover the first 7 points in a week
+to get a productive MVP with the required functionalities.
 
 ### Core functionalities
 
 - [x] Design and implement a documented RESTful API for the game (think of a mobile app for your API)
-- [ ] Implement an API client library for the API designed above. Ideally, in a different language, of your preference, to the one used for the API
+- [x] Implement an API client library for the API designed above. Ideally, in a different language, of your preference, to the one used for the API
 - [x] When a cell with no adjacent mines is revealed, all adjacent squares will be revealed (and repeat)
-- [ ] Ability to 'flag' a cell with a question mark or red flag
+- [x] Ability to 'flag' a cell with a question mark or red flag
 - [x] Detect when game is over
 - [x] Persistence
 - [x] Time tracking
