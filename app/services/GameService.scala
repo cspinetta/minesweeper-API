@@ -21,57 +21,58 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
 
   import GameService._
 
-  def create(cmd: GameCreationCommand)(implicit session: DBSession): AppResult[Game] = {
+  def create(userId: Long, cmd: GameCreationCommand)(implicit session: DBSession): AppResult[Game] = {
     for {
-      _ <- validatePlayerExists(cmd)
       _ <- validateGameCreationCommand(cmd)
-      game <- gameRepository.create(cmd, GameState.Created)
+      game <- gameRepository.create(userId, cmd, GameState.Created)
     } yield game
   }
 
+  def validateGameByUser(id: Long, userId: Long)(implicit session: DBSession): AppResult[Game] = {
+    gameRepository.findByIdAndPlayer(id, userId)
+  }
+
   def findById(id: Long)(implicit session: DBSession): AppResult[Game] = {
-    gameRepository.find(id)
+    gameRepository.findById(id)
   }
 
   def updateGameState(id: Long, newGameState: GameState)(implicit session: DBSession): AppResult[Game] = {
     for {
-      game <- gameRepository.find(id)
+      game <- gameRepository.findById(id)
       newState <- game.state.transition(newGameState)
       _ <- gameRepository.save(game.copy(state = newState))
-      updatedGame <- gameRepository.find(game.id)
+      updatedGame <- gameRepository.findById(game.id)
     } yield updatedGame
   }
 
-  def updateCellState(gameId: Long, cmd: SetCellStateCommand)(implicit session: DBSession): AppResult[Game] = {
+  def updateCellState(game: Game, cmd: SetCellStateCommand)(implicit session: DBSession): AppResult[Game] = {
     cmd.action match {
-      case CellAction.Reveal => revealCell(gameId, cmd.position)
-      case CellAction.SetRedFlag => updateFlag(gameId, cmd, CellState.RedFlag)
-      case CellAction.SetQuestionFlag => updateFlag(gameId, cmd, CellState.QuestionFlag)
-      case CellAction.Clean => updateFlag(gameId, cmd, CellState.Covered)
+      case CellAction.Reveal => revealCell(game, cmd.position)
+      case CellAction.SetRedFlag => updateFlag(game, cmd, CellState.RedFlag)
+      case CellAction.SetQuestionFlag => updateFlag(game, cmd, CellState.QuestionFlag)
+      case CellAction.Clean => updateFlag(game, cmd, CellState.Covered)
     }
   }
 
-  def revealCell(gameId: Long, position: Position)(implicit session: DBSession): AppResult[Game] = {
+  def revealCell(initialGame: Game, position: Position)(implicit session: DBSession): AppResult[Game] = {
     for {
-      initialGame <- gameRepository.find(gameId)
       startedGame <- checkGameState(initialGame, position)
       cell <- validateCellPosition(startedGame, position)
       _ <- cell.state.transition(CellState.Uncovered)
       boardWalker = doReveal(startedGame, position)
       _ <- boardWalker.updatedCells.toList.traverse(cell => cellRepository.save(cell))
       _ <- updateGame(boardWalker)
-      updatedGame <- gameRepository.find(gameId)
+      updatedGame <- gameRepository.findById(initialGame.id)
     } yield updatedGame
   }
 
-  def updateFlag(gameId: Long, cmd: SetCellStateCommand, newCellState: CellState)(implicit session: DBSession): AppResult[Game] = {
+  def updateFlag(initialGame: Game, cmd: SetCellStateCommand, newCellState: CellState)(implicit session: DBSession): AppResult[Game] = {
     for {
-      initialGame <- gameRepository.find(gameId)
       startedGame <- checkGameState(initialGame, cmd.position)
       cell <- validateCellPosition(startedGame, cmd.position)
       _ <- cell.state.transition(newCellState)
       _ <- cellRepository.save(cell.copy(state = newCellState))
-      updatedGame <- gameRepository.find(gameId)
+      updatedGame <- gameRepository.findById(initialGame.id)
     } yield updatedGame
   }
 
@@ -116,7 +117,7 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     for {
       _ <- cellRepository.create(cells)
       _ <- gameRepository.save(game.copy(state = GameState.Running, startTime = ZonedDateTime.now()))
-      updatedGame <- gameRepository.find(game.id)
+      updatedGame <- gameRepository.findById(game.id)
     } yield updatedGame
   }
 
@@ -124,7 +125,7 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
     for {
       newState <- game.state.transition(GameState.Running)
       _ <- gameRepository.save(game.copy(state = newState))
-      game <- gameRepository.find(game.id)
+      game <- gameRepository.findById(game.id)
     } yield game
   }
 
@@ -176,14 +177,6 @@ class GameService @Inject()(val appConfigProvider: AppConfigProvider,
           traverseBoard(newBoard)
         }
     }
-  }
-
-  private def validatePlayerExists(cmd: GameCreationCommand)(implicit session: DBSession): AppResult[Unit] = {
-    playerService.exists(cmd.playerId)
-      .flatMap {
-        case true => Right(())
-        case false => Left(InvalidParametersError("Player not exists"))
-      }
   }
 
   private def generateCells(game: Game, firstCellUncovered: Position): Seq[CellCreationCommand] = {

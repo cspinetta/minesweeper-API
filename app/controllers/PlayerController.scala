@@ -1,13 +1,14 @@
 package controllers
 
 import com.github.tototoshi.play2.json4s.Json4s
-import controllers.response.{BadRequestResponse, ErrorCode, InternalServerErrorResponse, NotFoundResponse, PlayerResponse}
+import controllers.response._
 import javax.inject._
 import models.{NotUniqueError, PlayerCreationCommand, ResourceNotFound}
 import org.json4s.JValue
 import play.api.Logging
 import play.api.mvc._
 import services.PlayerService
+import support.auth.UserAuthenticatedBuilder
 import support.db.TxSupport
 
 import scala.util.control.Exception.catching
@@ -18,7 +19,8 @@ import scala.util.control.Exception.catching
 @Singleton
 class PlayerController @Inject()(val controllerComponents: ControllerComponents,
                                  val playerService: PlayerService,
-                                 val json4s: Json4s)
+                                 val json4s: Json4s,
+                                 val userAuthenticated: UserAuthenticatedBuilder)
   extends ApiController with Logging with TxSupport {
 
   /**
@@ -26,8 +28,8 @@ class PlayerController @Inject()(val controllerComponents: ControllerComponents,
    *
    * @return 200 OK - new player, otherwise 4XX or 5XX errors.
    */
-  def create(): Action[JValue] = Action(json4s.json) { request =>
-    catching(classOf[Exception]).either(request.body.extract[PlayerCreationCommand]) match {
+  def create(): Action[JValue] = Action(json4s.json) { req =>
+    catching(classOf[Exception]).either(req.body.extract[PlayerCreationCommand]) match {
       case Right(cmd) =>
         withinTx(session => playerService.create(cmd)(session)) match {
           case Right(player) =>
@@ -47,13 +49,12 @@ class PlayerController @Inject()(val controllerComponents: ControllerComponents,
   }
 
   /**
-   * Get player information given the id.
+   * Get player information.
    *
-   * @param id player id
    * @return 200 OK - the player if it's found, otherwise 4XX or 5XX errors.
    */
-  def findById(id: Long): Action[AnyContent] = Action { _ =>
-    withinTx(session => playerService.findById(id)(session)) match {
+  def details(): Action[AnyContent] = userAuthenticated { req =>
+    withinTx(session => playerService.findById(req.user.userId)(session)) match {
       case Right(player) =>
         Ok(PlayerResponse(player).asJson)
       case Left(_: ResourceNotFound) =>
@@ -65,18 +66,18 @@ class PlayerController @Inject()(val controllerComponents: ControllerComponents,
   }
 
   /**
-   * Deletes a player given the id.
+   * Deletes a player.
    *
    * @return 204 NO_CONTENT - the player is deleted, otherwise 4XX or 5XX errors.
    */
-  def delete(id: Long): Action[AnyContent] = Action { _ =>
-    withinTx(session => playerService.deactivate(id)(session)) match {
-      case Right(player) =>
-        logger.info(s"Player successfully deactivated [id: $id]")
+  def delete(): Action[AnyContent] = userAuthenticated { req =>
+    withinTx(session => playerService.deactivate(req.user.userId)(session)) match {
+      case Right(_) =>
+        logger.info(s"Player successfully deactivated [id: ${req.user.userId}]")
         NoContent
       case Left(err) =>
-        logger.error(s"Error while deactivating player [id: $id]. Reason: ${err.reason}", err)
-        InternalServerError(InternalServerErrorResponse(s"Player cannot be deactivated [id: $id]", ErrorCode.InternalError).asJson)
+        logger.error(s"Error while deactivating player [id: ${req.user.userId}]. Reason: ${err.reason}", err)
+        InternalServerError(InternalServerErrorResponse(s"Player cannot be deactivated [id: ${req.user.userId}]", ErrorCode.InternalError).asJson)
     }
   }
 }

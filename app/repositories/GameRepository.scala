@@ -3,8 +3,8 @@ package repositories
 import java.sql.ResultSet
 import java.time.ZonedDateTime
 
-import models.GameActions._
 import javax.inject.{Inject, Singleton}
+import models.GameActions._
 import models.{GameState, _}
 import play.api.Logging
 import scalikejdbc._
@@ -14,9 +14,9 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class GameRepository @Inject()() extends Logging {
 
-  def create(cmd: GameCreationCommand, state: GameState)(implicit session: DBSession): Either[AppError, Game] = Try {
+  def create(userId: Long, cmd: GameCreationCommand, state: GameState)(implicit session: DBSession): Either[AppError, Game] = Try {
     val now = ZonedDateTime.now()
-    GameRepository.create(cmd.playerId, state, now, cmd.height, cmd.width, cmd.mines, now)
+    GameRepository.create(userId, state, now, cmd.height, cmd.width, cmd.mines, now)
   } match {
     case Success(value) => Right(value)
     case Failure(e) =>
@@ -43,8 +43,18 @@ class GameRepository @Inject()() extends Logging {
       Left(UnexpectedError("Unexpected error"))
   }
 
-  def find(id: Long)(implicit session: DBSession): Either[AppError, Game] = Try {
+  def findById(id: Long)(implicit session: DBSession): Either[AppError, Game] = Try {
     GameRepository.findById(id)
+  } match {
+    case Success(Some(value)) => Right(value)
+    case Success(None) => Left(ResourceNotFound(s"game $id not found"))
+    case Failure(e) =>
+      logger.error("Error while deactivating game", e)
+      Left(UnexpectedError("Unexpected error"))
+  }
+
+  def findByIdAndPlayer(id: Long, userId: Long)(implicit session: DBSession): Either[AppError, Game] = Try {
+    GameRepository.findByIdAndUser(id, userId)
   } match {
     case Success(Some(value)) => Right(value)
     case Success(None) => Left(ResourceNotFound(s"game $id not found"))
@@ -81,8 +91,7 @@ object GameRepository extends SQLSyntaxSupport[Game] {
 
   def opt(s: SyntaxProvider[Game])(rs: WrappedResultSet): Option[Game] = rs.longOpt(s.resultName.id).map(_ => apply(s.resultName)(rs))
 
-  val g = GameRepository.syntax("g")
-  val c = CellRepository.c
+  val (g, c, p) = (GameRepository.syntax("g"), CellRepository.c, PlayerRepository.p)
 
   private val isNotDeleted = sqls.isNull(g.deletedAt)
 
@@ -91,6 +100,18 @@ object GameRepository extends SQLSyntaxSupport[Game] {
     select.from(GameRepository as g)
       .leftJoin(CellRepository as CellRepository.c).on(c.gameId, g.id)
       .where.eq(g.id, id).and.append(isNotDeleted)
+  }
+    .one(GameRepository(g))
+    .toMany(CellRepository.opt(c))
+    .map { (game, cells) => game.copy(cells = cells) }
+    .single.apply()
+
+  // find by primary key and Player
+  def findByIdAndUser(id: Long, userId: Long)(implicit session: DBSession): Option[Game] = withSQL.apply[Game] {
+    select.from(GameRepository as g)
+      .innerJoin(PlayerRepository as PlayerRepository.p).on(p.id, g.playerId)
+      .leftJoin(CellRepository as CellRepository.c).on(c.gameId, g.id)
+      .where.eq(g.id, id).and.eq(p.id, userId).and.append(isNotDeleted).and.append(PlayerRepository.isNotDeleted)
   }
     .one(GameRepository(g))
     .toMany(CellRepository.opt(c))

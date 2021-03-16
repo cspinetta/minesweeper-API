@@ -10,7 +10,7 @@ import scala.util.control.Exception.ignoring
 trait TxSupport extends Logging {
 
   /**
-   * wrapper method for executing a block within the same transaction.
+   * wrap method for executing a block within the same transaction.
    * Provided `thunk` function is responsible to propagate and use on every DB operation the same DBSession supplied.
    *
    * @param thunk : block to be executed within a new transaction
@@ -32,7 +32,7 @@ trait TxSupport extends Logging {
   }
 
   /**
-   * wrapper method for executing a block within a read-only session.
+   * wrap method for executing a block within a read-only session.
    * Provided `thunk` function is responsible to propagate and use on every DB operation the same DBSession supplied.
    *
    * @param thunk : block to be executed within a read-only session
@@ -70,3 +70,5 @@ trait TxSupport extends Logging {
     }
   }
 }
+
+object TxSupport extends TxSupport

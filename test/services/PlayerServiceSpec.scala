@@ -1,7 +1,6 @@
 package services
 
 import examples.PlayerExamples
-import models.PlayerCreationCommand
 import org.scalatest.{EitherValues, MustMatchers, fixture}
 import repositories.PlayerRepository
 import utils.db.{AutoRollback, Connection}
@@ -22,14 +21,13 @@ class PlayerServiceSpec extends fixture.FlatSpec with Connection with AutoRollba
   }
 
   it should "not create a new player when exists another one with the same username" in { implicit session =>
-    playerService.create(PlayerCreationCommand(username = "game-service-test-1")).right.value
-    val cmd = PlayerCreationCommand(username = "game-service-test-1")
-    val result = playerService.create(cmd).left.value
-    result must matchPattern { case models.NotUniqueError(_) => }
+    val cmd = PlayerExamples.PlayerOne.CreationCommand.copy(username = "game-service-test-1")
+    playerService.create(cmd).right.value
+    playerService.create(cmd).left.value must matchPattern { case models.NotUniqueError(_) => }
   }
 
   it should "fetch a player successfully given an existent ID" in { implicit session =>
-    val playerId = playerService.create(PlayerCreationCommand(username = "player-service-test-2")).right.value.id
+    val playerId = playerService.create(PlayerExamples.PlayerOne.CreationCommand.copy(username = "player-service-test-2")).right.value.id
     val result = playerService.findById(playerId)
     val player = result.right.value
     player.id must be(playerId)
@@ -42,7 +40,7 @@ class PlayerServiceSpec extends fixture.FlatSpec with Connection with AutoRollba
   }
 
   it should "mark as deleted a player successfully given an existent ID" in { implicit session =>
-    val playerId = playerService.create(PlayerCreationCommand(username = "player-service-test-3")).right.value.id
+    val playerId = playerService.create(PlayerExamples.PlayerOne.CreationCommand.copy(username = "player-service-test-3")).right.value.id
     val result = playerService.deactivate(playerId)
     val _: Unit = result.right.value
 

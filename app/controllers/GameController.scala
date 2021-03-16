@@ -9,6 +9,7 @@ import org.json4s.JValue
 import play.api.Logging
 import play.api.mvc._
 import services.{AsciiPrinterService, GameService}
+import support.auth.UserAuthenticatedBuilder
 import support.db.TxSupport
 
 import scala.util.control.Exception.catching
@@ -20,7 +21,8 @@ import scala.util.control.Exception.catching
 class GameController @Inject()(val controllerComponents: ControllerComponents,
                                val gameService: GameService,
                                val asciiPrinterService: AsciiPrinterService,
-                               val json4s: Json4s)
+                               val json4s: Json4s,
+                               val userAuthenticated: UserAuthenticatedBuilder)
   extends ApiController with Logging with TxSupport {
 
   /**
@@ -28,10 +30,10 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
    *
    * @return 200 OK - new game created, otherwise 4XX or 5XX errors.
    */
-  def create(): Action[JValue] = Action(json4s.json) { request =>
-    catching(classOf[Exception]).either(request.body.extract[GameCreationCommand]) match {
+  def create(): Action[JValue] = userAuthenticated(json4s.json) { req =>
+    catching(classOf[Exception]).either(req.body.extract[GameCreationCommand]) match {
       case Right(cmd) =>
-        withinTx(session => gameService.create(cmd)(session)) match {
+        withinTx(session => gameService.create(req.user.userId, cmd)(session)) match {
           case Right(game) =>
             logger.info(s"game successfully created [id: ${game.id}, player_id: ${game.playerId}, " +
               s"height: ${game.height}, width: ${game.width}, mines: ${game.mines}]")
@@ -55,8 +57,8 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
    * @param id game id
    * @return 200 OK - the game if it's found, otherwise 4XX or 5XX errors.
    */
-  def findById(id: Long): Action[AnyContent] = Action { _ =>
-    withinTx(session => gameService.findById(id)(session)) match {
+  def findById(id: Long): Action[AnyContent] = userAuthenticated { req =>
+    withinTx(session => gameService.validateGameByUser(id, req.user.userId)(session)) match {
       case Right(game) =>
         Ok(GameResponse(game).asJson)
       case Left(_: ResourceNotFound) =>
@@ -72,10 +74,12 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
    *
    * @return 200 OK - the flag is added, otherwise 4XX or 5XX errors.
    */
-  def setCellState(id: Long): Action[JValue] = Action(json4s.json) { request =>
-    catching(classOf[Exception]).either(request.body.extract[SetCellStateCommand]) match {
+  def setCellState(id: Long): Action[JValue] = userAuthenticated(json4s.json) { req =>
+    catching(classOf[Exception]).either(req.body.extract[SetCellStateCommand]) match {
       case Right(cmd) =>
-        withinTx(session => gameService.updateCellState(id, cmd)(session)) match {
+        withinTx(session =>
+          gameService.validateGameByUser(id, req.user.userId)(session).flatMap(game =>
+            gameService.updateCellState(game, cmd)(session))) match {
           case Right(game) =>
             logger.debug(s"game successfully updated [id: ${game.id}, player_id: ${game.playerId}, " +
               s"SetCellCommand: $cmd]")
@@ -98,8 +102,10 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
    * @param id game id
    * @return 200 OK - the game if it's found, otherwise 4XX or 5XX errors.
    */
-  def boardInASCII(id: Long, debug: Option[Boolean]): Action[AnyContent] = Action { _ =>
-    withinTx(session => asciiPrinterService.getBoardInAscii(id, debug.getOrElse(false))(session)) match {
+  def boardInASCII(id: Long, debug: Option[Boolean]): Action[AnyContent] = userAuthenticated { req =>
+    withinTx(session =>
+      gameService.validateGameByUser(id, req.user.userId)(session).map(game =>
+        asciiPrinterService.getBoardInAscii(game, debug.getOrElse(false)))) match {
       case Right(ascii) =>
         Ok(ascii)
       case Left(_: ResourceNotFound) =>

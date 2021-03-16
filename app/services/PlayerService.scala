@@ -18,10 +18,10 @@ class PlayerService @Inject()(val playerRepository: PlayerRepository) extends Lo
   }
 
   def findById(id: Long)(implicit session: DBSession): Either[AppError, Player] = {
-    playerRepository.find(id)
+    playerRepository.findById(id)
   }
 
-  def exists(id: Long)(implicit session: DBSession): Either[AppError, Boolean] = {
-    playerRepository.exists(id)
+  def findByCredentials(user: String, encodedPass: String)(implicit session: DBSession): Either[AppError, Player] = {
+    playerRepository.findByCredentials(user, encodedPass)
   }
 }
