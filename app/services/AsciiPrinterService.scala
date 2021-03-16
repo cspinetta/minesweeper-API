@@ -9,11 +9,30 @@ import play.api.Logging
 class AsciiPrinterService @Inject()(val appConfigProvider: AppConfigProvider) extends Logging {
 
   def getBoardInAscii(game: Game, showMines: Boolean): String = {
-    val printer = if (showMines) printForDebugging _ else printForUser _
-    generateBoard(game, printer)
+    game.state match {
+      case GameState.Created =>
+        generateBoardInUninitializedGame(game)
+      case _ =>
+        val printer = if (showMines) printForDebugging _ else printForUser _
+        generateBoardInInitializedGame(game, printer)
+    }
   }
 
-  def generateBoard(game: Game, printer: Cell => String): String = {
+  def generateBoardInUninitializedGame(game: Game): String = {
+    val matrix = Array.ofDim[Cell](game.width, game.height)
+    val ascii = new StringBuilder("")
+    for {
+      (row, rowIndex) <- matrix.zipWithIndex
+      (_, collIndex) <- row.zipWithIndex
+    } {
+      ascii ++= AsciiSymbols.covered
+      if (collIndex == game.height - 1 && rowIndex < game.width - 1)
+        ascii ++= System.lineSeparator
+    }
+    ascii.toString()
+  }
+
+  def generateBoardInInitializedGame(game: Game, printer: Cell => String): String = {
     val matrix = Array.ofDim[Cell](game.width, game.height)
     game.cells.foreach(cell => matrix(cell.y - 1)(cell.x - 1) = cell)
     val ascii = new StringBuilder("")
@@ -50,22 +69,7 @@ object AsciiSymbols {
   val covered: String = " - "
   val redFlag: String = s" ${Character.toString(9873)} " // ⚑
   val questionFlag: String = " ? "
-  val mine: String = s" ${Character.toString(128163)} " // 💣
-
-  /* s must be an even-length string. *//* s must be an even-length string. */
-  def hexStringToByteArray(s: String): Array[Byte] = {
-    val len = s.length
-    val data = new Array[Byte](len / 2)
-    var i = 0
-    while ( {
-      i < len
-    }) {
-      data(i / 2) = ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16)).toByte
-
-      i += 2
-    }
-    data
-  }
+  val mine: String = s" ${Character.toString(128163)}" // 💣
 }
 
 
