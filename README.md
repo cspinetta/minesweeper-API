@@ -13,6 +13,8 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 
 Go to the sub-folder [minesweeper-cli](./minesweeper-cli)
 
+![Minesweeper CLI](docs/minsweeper-cli_v1.png)
+
 ## API
 
 This app uses Basic Access Authentication. More info at https://en.wikipedia.org/wiki/Basic_access_authentication
