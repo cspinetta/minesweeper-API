@@ -135,20 +135,20 @@ POST          /games                        controllers.GameController.create()
 GET           /games/:id                    controllers.GameController.findById(id: Long)
 
 ###
-#  summary: Reveal a cell given the game id and the cell position
+#  summary: Update cell state given the game id, the cell position and the desired new state
 #  tags:
 #    - Game
 #  parameters:
 #    - name: body
 #      schema:
-#        $ref: '#/definitions/models.GameActions.RevealCellCommand'
+#        $ref: '#/definitions/models.GameActions.SetCellStateCommand'
 #  responses:
 #    200:
-#      description: The cell is revealed and the new game state is returned
+#      description: The cell state is updated and the new game state is returned
 #      schema:
 #        $ref: '#/definitions/controllers.response.GameResponse'
 #    400:
-#      description: Reveal cell request cannot be parsed
+#      description: update cell state request cannot be parsed
 #      schema:
 #        $ref: '#/definitions/controllers.response.BadRequestResponse'
 #    404:
@@ -156,27 +156,21 @@ GET           /games/:id                    controllers.GameController.findById(
 #      schema:
 #        $ref: '#/definitions/controllers.response.NotFoundResponse'
 #    500:
-#      description: Cell cannot be revealed
+#      description: Cell cannot be updated
 #      schema:
 #        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
 ###
-PATCH         /games/:id/reveal             controllers.GameController.revealCell(id: Long)
+PATCH         /games/:id                    controllers.GameController.setCellState(id: Long)
 
 ###
-#  summary: Add or remove a flag given the game id and the cell position
+#  summary: Get ASCII representation of the game board given the id.
 #  tags:
 #    - Game
-#  parameters:
-#    - name: body
-#      schema:
-#        $ref: '#/definitions/models.GameActions.SetFlagCommand'
 #  responses:
 #    200:
-#      description: The flag is updated and the new game state is returned
-#      schema:
-#        $ref: '#/definitions/controllers.response.GameResponse'
+#      description: The board in ASCII representation is returned
 #    400:
-#      description: Set flag request cannot be parsed
+#      description: update cell state request cannot be parsed
 #      schema:
 #        $ref: '#/definitions/controllers.response.BadRequestResponse'
 #    404:
@@ -184,11 +178,14 @@ PATCH         /games/:id/reveal             controllers.GameController.revealCel
 #      schema:
 #        $ref: '#/definitions/controllers.response.NotFoundResponse'
 #    500:
-#      description: Flag cannot be updated
+#      description: Cell cannot be updated
 #      schema:
 #        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+#  produces:
+#    - text/plain; charset=UTF-8
 ###
-PATCH         /games/:id/flag               controllers.GameController.setFlag(id: Long)
+GET           /games/:id/ascii              controllers.GameController.boardInASCII(id: Long, debug: Option[Boolean])
+
 
 ### NoDocs ###
 GET           /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)

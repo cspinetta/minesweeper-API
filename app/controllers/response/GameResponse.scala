@@ -10,7 +10,7 @@ case class GameResponse(id: Long,
                         finishTime: Option[ZonedDateTime] = None,
                         cells: scala.collection.Seq[CellResponse])
 
-case class CellResponse(x: Int, y: Int, state: CellState, hasMine: Boolean, hasFlag: Boolean)
+case class CellResponse(x: Int, y: Int, state: CellState, hasMine: Boolean, adjacentMines: Int)
 
 object GameResponse {
   def apply(game: Game): GameResponse = {
@@ -19,7 +19,7 @@ object GameResponse {
       y = c.y,
       state = c.state,
       hasMine = c.hasMine,
-      hasFlag = c.hasFlag,
+      adjacentMines = c.adjacentMines,
     ))
     new GameResponse(
       id = game.id,

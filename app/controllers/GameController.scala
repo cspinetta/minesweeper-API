@@ -8,7 +8,7 @@ import models.{InvalidParametersError, ResourceNotFound}
 import org.json4s.JValue
 import play.api.Logging
 import play.api.mvc._
-import services.GameService
+import services.{AsciiPrinterService, GameService}
 import support.db.TxSupport
 
 import scala.util.control.Exception.catching
@@ -19,6 +19,7 @@ import scala.util.control.Exception.catching
 @Singleton
 class GameController @Inject()(val controllerComponents: ControllerComponents,
                                val gameService: GameService,
+                               val asciiPrinterService: AsciiPrinterService,
                                val json4s: Json4s)
   extends ApiController with Logging with TxSupport {
 
@@ -67,52 +68,45 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
   }
 
   /**
-   * Reveal a cell given the game id and the cell position.
+   * Update cell state given the game id, the cell position and the desired new state.
    *
-   * @return 200 OK - the cell is revealed, otherwise 4XX or 5XX errors.
+   * @return 200 OK - the flag is added, otherwise 4XX or 5XX errors.
    */
-  def revealCell(id: Long): Action[JValue] = Action(json4s.json) { request =>
-    catching(classOf[Exception]).either(request.body.extract[RevealCellCommand]) match {
+  def setCellState(id: Long): Action[JValue] = Action(json4s.json) { request =>
+    catching(classOf[Exception]).either(request.body.extract[SetCellStateCommand]) match {
       case Right(cmd) =>
-        withinTx(session => gameService.revealCell(id, cmd)(session)) match {
+        withinTx(session => gameService.updateCellState(id, cmd)(session)) match {
           case Right(game) =>
             logger.debug(s"game successfully updated [id: ${game.id}, player_id: ${game.playerId}, " +
-              s"RevealCellCommand: $cmd]")
+              s"SetCellCommand: $cmd]")
             Ok(GameResponse(game).asJson)
           case Left(_: ResourceNotFound) =>
             NotFound(NotFoundResponse("Game / cell position cannot be found", ErrorCode.NotFound).asJson)
           case Left(err) =>
-            logger.error(s"error while revealing a cell. Reason: ${err.reason}", err)
-            InternalServerError(InternalServerErrorResponse("cell cannot be revealed", ErrorCode.InternalError).asJson)
+            logger.error(s"error while updating a cell. Reason: ${err.reason}", err)
+            InternalServerError(InternalServerErrorResponse("cell cannot be updated", ErrorCode.InternalError).asJson)
         }
       case Left(err) =>
-        logger.error("reveal cell request cannot be parsed", err)
-        BadRequest(BadRequestResponse("reveal cell request cannot be parsed", ErrorCode.ValidationError).asJson)
+        logger.error("set cell request cannot be parsed", err)
+        BadRequest(BadRequestResponse("set cell request cannot be parsed", ErrorCode.ValidationError).asJson)
     }
   }
 
   /**
-   * Add or remove a flag given the game id and the cell position.
+   * Get ASCII representation of the game board given the id.
    *
-   * @return 200 OK - the flag is added, otherwise 4XX or 5XX errors.
+   * @param id game id
+   * @return 200 OK - the game if it's found, otherwise 4XX or 5XX errors.
    */
-  def setFlag(id: Long): Action[JValue] = Action(json4s.json) { request =>
-    catching(classOf[Exception]).either(request.body.extract[SetFlagCommand]) match {
-      case Right(cmd) =>
-        withinTx(session => gameService.setFlag(id, cmd)(session)) match {
-          case Right(game) =>
-            logger.debug(s"game successfully updated [id: ${game.id}, player_id: ${game.playerId}, " +
-              s"SetFlagCommand: $cmd]")
-            Ok(GameResponse(game).asJson)
-          case Left(_: ResourceNotFound) =>
-            NotFound(NotFoundResponse("Game / cell position cannot be found", ErrorCode.NotFound).asJson)
-          case Left(err) =>
-            logger.error(s"error while updating a flag. Reason: ${err.reason}", err)
-            InternalServerError(InternalServerErrorResponse("flag cannot be updated", ErrorCode.InternalError).asJson)
-        }
+  def boardInASCII(id: Long, debug: Option[Boolean]): Action[AnyContent] = Action { _ =>
+    withinTx(session => asciiPrinterService.getBoardInAscii(id, debug.getOrElse(false))(session)) match {
+      case Right(ascii) =>
+        Ok(ascii)
+      case Left(_: ResourceNotFound) =>
+        NotFound(NotFoundResponse("Game cannot be found", ErrorCode.NotFound).asJson)
       case Left(err) =>
-        logger.error("set flag request cannot be parsed", err)
-        BadRequest(BadRequestResponse("set flag request cannot be parsed", ErrorCode.ValidationError).asJson)
+        logger.error(s"Error while generating ASCII game. Reason: ${err.reason}", err)
+        InternalServerError(InternalServerErrorResponse("Game ASCII cannot be generated", ErrorCode.InternalError).asJson)
     }
   }
 }

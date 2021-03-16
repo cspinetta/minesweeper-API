@@ -20,6 +20,16 @@ class CellRepository @Inject()() extends Logging {
       logger.error("Error while saving new cells", e)
       Left(UnexpectedError("Unexpected error"))
   }
+
+  def save(cell: Cell)(implicit session: DBSession): Either[AppError, Unit] = Try {
+    CellRepository.save(cell)
+  } match {
+    case Success(affectedRows) if affectedRows > 0 => Right(())
+    case Success(affectedRows) if affectedRows <= 0 => Left(UnexpectedError("Unexpected error. No affected rows when trying to update a cell"))
+    case Failure(e) =>
+      logger.error(s"Error while saving a cell [id: ${cell.id}]", e)
+      Left(UnexpectedError("Unexpected error"))
+  }
 }
 
 object CellRepository extends SQLSyntaxSupport[Cell] {
@@ -27,7 +37,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
   import cellBinders._
 
   override val tableName = "cell"
-  override val columns = Seq("id", "game_id", "x", "y", "state", "has_mine", "has_flag")
+  override val columns = Seq("id", "game_id", "x", "y", "state", "has_mine", "adjacent_mines")
 
   def apply(p: SyntaxProvider[Cell])(rs: WrappedResultSet): Cell = apply(p.resultName)(rs)
 
@@ -38,7 +48,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
     y = rs.get(p.y),
     state = rs.get(p.state),
     hasMine = rs.get(p.hasMine),
-    hasFlag = rs.get(p.hasFlag))
+    adjacentMines = rs.get(p.adjacentMines))
 
   def opt(s: SyntaxProvider[Cell])(rs: WrappedResultSet): Option[Cell] = rs.longOpt(s.resultName.id).map(_ => apply(s.resultName)(rs))
 
@@ -46,7 +56,7 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
 
   def create(cells: Seq[CellCreationCommand])(implicit session: DBSession): Seq[Int] = {
     val batchParams: Seq[Seq[Any]] = cells.foldLeft(Seq.empty[Seq[Any]])((seq, cell) =>
-      seq :+ Seq(cell.gameId, cell.x, cell.y, CellState.Covered.toString, cell.hasMine, cell.hasFlag))
+      seq :+ Seq(cell.gameId, cell.x, cell.y, CellState.Covered.toString, cell.hasMine, cell.adjacentMines))
     withSQL {
       insert.into(CellRepository).namedValues(
         column.gameId -> sqls.?,
@@ -54,9 +64,21 @@ object CellRepository extends SQLSyntaxSupport[Cell] {
         column.y -> sqls.?,
         column.state -> sqls.?,
         column.hasMine -> sqls.?,
-        column.hasFlag -> sqls.?,
+        column.adjacentMines -> sqls.?,
       )
     }.batch(batchParams: _*).apply()
+  }
+
+  def save(cell: Cell)(implicit session: DBSession): Int = {
+    withSQL {
+      update(CellRepository).set(
+        column.x -> cell.x,
+        column.y -> cell.y,
+        column.state -> cell.state,
+        column.hasMine -> cell.hasMine,
+        column.adjacentMines -> cell.adjacentMines)
+        .where.eq(column.id, cell.id)
+    }.update.apply()
   }
 
   object cellBinders {

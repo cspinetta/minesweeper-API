@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS cell (
   y int not null,
   state varchar(64) not null,
   has_mine boolean not null,
-  has_flag boolean not null,
+  adjacent_mines int not null,
   CONSTRAINT fk_game
       FOREIGN KEY(game_id)
 	  REFERENCES game(id)
