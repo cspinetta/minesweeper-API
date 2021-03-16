@@ -40,9 +40,11 @@ GET           /health-check                 controllers.HealthCheckController.he
 POST          /player                       controllers.PlayerController.create()
 
 ###
-#  summary: Get player information given the id
+#  summary: Get player information
 #  tags:
 #    - Player
+#  security:
+#    - BasicAuth: []
 #  responses:
 #    200:
 #      description: Success
@@ -61,12 +63,14 @@ POST          /player                       controllers.PlayerController.create(
 #      schema:
 #        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
 ###
-GET           /player/:id                   controllers.PlayerController.findById(id: Long)
+GET           /player                       controllers.PlayerController.details()
 
 ###
-#  summary: Delete a player given the id
+#  summary: Delete a player
 #  tags:
 #    - Player
+#  security:
+#    - BasicAuth: []
 #  responses:
 #    204:
 #      description: Success
@@ -79,7 +83,7 @@ GET           /player/:id                   controllers.PlayerController.findByI
 #      schema:
 #        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
 ###
-DELETE        /player/:id                   controllers.PlayerController.delete(id: Long)
+DELETE        /player                       controllers.PlayerController.delete()
 
 
 ###
@@ -90,6 +94,8 @@ DELETE        /player/:id                   controllers.PlayerController.delete(
 #    - name: body
 #      schema:
 #        $ref: '#/definitions/models.GameActions.GameCreationCommand'
+#  security:
+#    - BasicAuth: []
 #  responses:
 #    200:
 #      description: A new game is created
@@ -114,6 +120,8 @@ POST          /games                        controllers.GameController.create()
 #  summary: Get game information given the id
 #  tags:
 #    - Game
+#  security:
+#    - BasicAuth: []
 #  responses:
 #    200:
 #      description: The cell is revealed
@@ -142,6 +150,8 @@ GET           /games/:id                    controllers.GameController.findById(
 #    - name: body
 #      schema:
 #        $ref: '#/definitions/models.GameActions.SetCellStateCommand'
+#  security:
+#    - BasicAuth: []
 #  responses:
 #    200:
 #      description: The cell state is updated and the new game state is returned
@@ -166,6 +176,8 @@ PATCH         /games/:id                    controllers.GameController.setCellSt
 #  summary: Get ASCII representation of the game board given the id.
 #  tags:
 #    - Game
+#  security:
+#    - BasicAuth: []
 #  responses:
 #    200:
 #      description: The board in ASCII representation is returned

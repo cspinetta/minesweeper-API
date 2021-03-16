@@ -2,8 +2,8 @@ package services
 
 import com.typesafe.config.ConfigFactory
 import conf.AppConfigProvider
-import examples.GameExamples
-import models.{CellState, GameState, PlayerCreationCommand, Position}
+import examples.{GameExamples, PlayerExamples}
+import models.{CellState, GameState, Position}
 import org.scalatest.{EitherValues, MustMatchers, fixture}
 import play.api.Configuration
 import repositories.{CellRepository, GameRepository, PlayerRepository}
@@ -28,9 +28,9 @@ class GameServiceSpec extends fixture.FlatSpec with Connection with AutoRollback
   behavior of "Game service"
 
   it should "create a new game successfully" in { implicit session =>
-    val playerId = playerService.create(PlayerCreationCommand(username = "game-service-test-1")).right.value.id
-    val cmd = GameExamples.GameOne.CreationCommand.copy(playerId = playerId)
-    val result = gameService.create(cmd)
+    playerService.create(PlayerExamples.PlayerOne.CreationCommand.copy(username = "game-service-test-1")).right.value.id
+    val cmd = GameExamples.GameOne.CreationCommand
+    val result = gameService.create(GameExamples.GameOne.Sample.playerId, cmd)
     val game = result.right.value
     game.id mustBe >(0L)
     game.width must be(cmd.width)
@@ -43,15 +43,15 @@ class GameServiceSpec extends fixture.FlatSpec with Connection with AutoRollback
   }
 
   it should "initialize the game at the first reveal" in { implicit session =>
-    val playerId = playerService.create(PlayerCreationCommand(username = "game-service-test-2")).right.value.id
-    val cmd = GameExamples.GameOne.CreationCommand.copy(playerId = playerId)
-    val result = gameService.create(cmd)
-    val gameId = result.right.value.id
+    val playerId = playerService.create(PlayerExamples.PlayerOne.CreationCommand.copy(username = "game-service-test-2")).right.value.id
+    val cmd = GameExamples.GameOne.CreationCommand
+    val result = gameService.create(playerId, cmd)
+    val initialGame = result.right.value
 
     val position = Position(x = 2, y = 2)
-    val game = gameService.revealCell(gameId, position).right.value
+    val game = gameService.revealCell(initialGame, position).right.value
 
-    game.id must be(gameId)
+    game.id must be(initialGame.id)
     game.width must be(cmd.width)
     game.height must be(cmd.height)
     game.mines must be(cmd.mines)

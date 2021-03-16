@@ -8,7 +8,7 @@ import scala.collection.immutable
 
 object GameActions {
 
-  case class GameCreationCommand(playerId: Long, height: Int, width: Int, mines: Int)
+  case class GameCreationCommand(height: Int, width: Int, mines: Int)
 
   case class SetCellStateCommand(action: CellAction, position: Position)
 

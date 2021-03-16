@@ -4,17 +4,13 @@ import conf.AppConfigProvider
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logging
-import scalikejdbc.DBSession
 
 @Singleton
-class AsciiPrinterService @Inject()(val appConfigProvider: AppConfigProvider,
-                                    val gameService: GameService) extends Logging {
+class AsciiPrinterService @Inject()(val appConfigProvider: AppConfigProvider) extends Logging {
 
-  def getBoardInAscii(gameId: Long, showMines: Boolean)(implicit session: DBSession): AppResult[String] = {
-    for {
-      game <- gameService.findById(gameId)
-      printer = if (showMines) printForDebugging _ else printForUser _
-    } yield generateBoard(game, printer)
+  def getBoardInAscii(game: Game, showMines: Boolean): String = {
+    val printer = if (showMines) printForDebugging _ else printForUser _
+    generateBoard(game, printer)
   }
 
   def generateBoard(game: Game, printer: Cell => String): String = {

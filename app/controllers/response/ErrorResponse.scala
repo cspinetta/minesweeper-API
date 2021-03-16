@@ -37,6 +37,14 @@ object UnprocessableResponse {
   implicit val writeUnprocessableResponse: Writes[UnprocessableResponse] = Json.writes[UnprocessableResponse]
 }
 
+case class UnauthorizedResponse(message: String, errorCode: String) extends ErrorResponse {
+  val error: String = "internal_server_error"
+}
+
+object UnauthorizedResponse {
+  implicit val writeUnauthorizedResponse: Writes[UnauthorizedResponse] = Json.writes[UnauthorizedResponse]
+}
+
 case class InternalServerErrorResponse(message: String, errorCode: String) extends ErrorResponse {
   val error: String = "internal_server_error"
 }

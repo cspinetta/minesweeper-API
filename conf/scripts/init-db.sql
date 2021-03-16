@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS player (
   id serial primary key,
   username varchar(256) not null,
+  encoded_pass varchar(256) not null,
   created_at timestamp not null,
   deleted_at timestamp,
   UNIQUE(username)

@@ -9,9 +9,11 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 
 ## API
 
+This app uses Basic Access Authentication. More info at https://en.wikipedia.org/wiki/Basic_access_authentication
+
 **You can explore the Swagger UI:**
 
-![Swagger UI](docs/swagger-api-doc_v1.png)
+![Swagger UI](docs/swagger-api-doc_v2.png)
 
 - At localhost:
 
@@ -31,27 +33,32 @@ curl -X GET http://localhost:9000/health-check
 
 * **/players**
 
-**Create a new one:**
+**Create:**
 
 ````shell script
 curl --request POST \
   --url http://localhost:9000/player \
   --header 'Content-Type: application/json' \
   --data '{
-	"username": "player_1"
+	"username": "<username>",
+	"password": "<password>"
 }'
 ````
 
 **Get by ID:**
 
 ````shell script
-curl -X GET http://localhost:9000/player/2
+curl --request GET \
+  --url http://localhost:9000/player \
+  --header 'Authorization: Basic <credentials>'
 ````
 
 **Delete by ID:**
 
 ````shell script
-curl -X DELETE  http://localhost:9000/player/2
+curl --request DELETE \
+  --url http://localhost:9000/player/2 \
+  --header 'Authorization: Basic <credentials>'
 ````
 
 * **/games**
@@ -62,6 +69,7 @@ curl -X DELETE  http://localhost:9000/player/2
 curl --request POST \
   --url http://localhost:9000/games \
   --header 'Content-Type: application/json' \
+  --header 'Authorization: Basic <credentials>' \
   --data '{
 	"playerId": 1,
 	"height": 10,
@@ -73,7 +81,9 @@ curl --request POST \
 **Get by ID:**
 
 ````shell script
-curl -X GET "http://localhost:9000/games/1"
+curl --request GET \
+  --url http://localhost:9000/games/1 \
+  --header 'Authorization: Basic <credentials>'
 ````
 
 **Reveal a cell:**
@@ -82,11 +92,12 @@ curl -X GET "http://localhost:9000/games/1"
 curl --request PATCH \
   --url http://localhost:9000/games/1 \
   --header 'Content-Type: application/json' \
+  --header 'Authorization: Basic <credentials>' \ 
   --data '{
 	"action": "reveal",
 	"position": {
-		"x": 2,
-		"y": 2
+		"x": 8,
+		"y": 10
 	}
 }'
 ````
@@ -97,11 +108,12 @@ curl --request PATCH \
 curl --request PATCH \
   --url http://localhost:9000/games/1 \
   --header 'Content-Type: application/json' \
+  --header 'Authorization: Basic <credentials>' \ 
   --data '{
 	"action": "set-question-flag",
 	"position": {
-		"x": 2,
-		"y": 2
+		"x": 8,
+		"y": 10
 	}
 }'
 ````
@@ -112,11 +124,12 @@ curl --request PATCH \
 curl --request PATCH \
   --url http://localhost:9000/games/1 \
   --header 'Content-Type: application/json' \
+  --header 'Authorization: Basic <credentials>' \ 
   --data '{
 	"action": "set-red-flag",
 	"position": {
-		"x": 2,
-		"y": 2
+		"x": 8,
+		"y": 10
 	}
 }'
 ````
@@ -127,11 +140,12 @@ curl --request PATCH \
 curl --request PATCH \
   --url http://localhost:9000/games/1 \
   --header 'Content-Type: application/json' \
+  --header 'Authorization: Basic <credentials>' \ 
   --data '{
 	"action": "clean",
 	"position": {
-		"x": 2,
-		"y": 2
+		"x": 8,
+		"y": 10
 	}
 }'
 ````

@@ -3,7 +3,7 @@ package examples
 import java.time.ZonedDateTime
 
 import models.GameActions.GameCreationCommand
-import models.{Cell, CellState, Game, GameState, Player, PlayerCreationCommand}
+import models.{Game, GameState}
 import org.json4s.JValue
 import support.json.JsonSupport
 
@@ -13,11 +13,11 @@ object GameExamples extends JsonSupport {
 
   object GameOne {
 
-    val CreationCommand: GameCreationCommand = GameCreationCommand(playerId = 1L, height = 10, width = 10, mines = 4)
+    val CreationCommand: GameCreationCommand = GameCreationCommand(height = 10, width = 10, mines = 4)
 
     val Sample: Game = Game(
       id = 1L,
-      playerId = CreationCommand.playerId,
+      playerId = 1L,
       state = GameState.Running,
       startTime = now,
       finishTime = None,
@@ -30,4 +30,5 @@ object GameExamples extends JsonSupport {
 
     val Json: JValue = Sample.asJson
   }
+
 }

@@ -6,4 +6,5 @@ object ErrorCode {
   val ClientError = "C003"
   val InternalError = "C004"
   val AlreadyExists = "C005"
+  val Unauthorized = "C005"
 }
