@@ -21,14 +21,14 @@ http://localhost:9000/docs/swagger-ui/index.html?url=/assets/swagger.json#/
 
 - At production:
 
-TBD
+https://cspinetta-minesweeper-api.herokuapp.com/docs/swagger-ui/index.html?url=/assets/swagger.json
 
 **Or pick a curl:**
 
 * **/health-check**
 
 ````shell script
-curl -X GET http://localhost:9000/health-check
+curl -X GET https://cspinetta-minesweeper-api.herokuapp.com/health-check
 ````
 
 * **/players**
@@ -37,7 +37,7 @@ curl -X GET http://localhost:9000/health-check
 
 ````shell script
 curl --request POST \
-  --url http://localhost:9000/player \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/player \
   --header 'Content-Type: application/json' \
   --data '{
 	"username": "<username>",
@@ -49,7 +49,7 @@ curl --request POST \
 
 ````shell script
 curl --request GET \
-  --url http://localhost:9000/player \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/player \
   --header 'Authorization: Basic <credentials>'
 ````
 
@@ -57,7 +57,7 @@ curl --request GET \
 
 ````shell script
 curl --request DELETE \
-  --url http://localhost:9000/player/2 \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/player/2 \
   --header 'Authorization: Basic <credentials>'
 ````
 
@@ -67,7 +67,7 @@ curl --request DELETE \
 
 ````shell script
 curl --request POST \
-  --url http://localhost:9000/games \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/games \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Basic <credentials>' \
   --data '{
@@ -82,7 +82,7 @@ curl --request POST \
 
 ````shell script
 curl --request GET \
-  --url http://localhost:9000/games/1 \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
   --header 'Authorization: Basic <credentials>'
 ````
 
@@ -90,7 +90,7 @@ curl --request GET \
 
 ````shell script
 curl --request PATCH \
-  --url http://localhost:9000/games/1 \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Basic <credentials>' \ 
   --data '{
@@ -106,7 +106,7 @@ curl --request PATCH \
 
 ````shell script
 curl --request PATCH \
-  --url http://localhost:9000/games/1 \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Basic <credentials>' \ 
   --data '{
@@ -122,7 +122,7 @@ curl --request PATCH \
 
 ````shell script
 curl --request PATCH \
-  --url http://localhost:9000/games/1 \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Basic <credentials>' \ 
   --data '{
@@ -138,7 +138,7 @@ curl --request PATCH \
 
 ````shell script
 curl --request PATCH \
-  --url http://localhost:9000/games/1 \
+  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Basic <credentials>' \ 
   --data '{

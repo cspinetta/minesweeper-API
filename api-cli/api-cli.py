@@ -2,7 +2,8 @@
 
 import requests as requests
 
-hostname = 'localhost:9000'
+hostname_dev = 'http://localhost:9000'
+hostname_prod = 'https://cspinetta-minesweeper-api.herokuapp.com'
 
 
 def run():
@@ -21,7 +22,7 @@ class MinesweeperAPIClient:
         self.session.auth = (user, password)
 
     def new_game(self, height, width, mines):
-        r = self.session.post(f'http://{hostname}/games', json={'height': height, 'width': width, 'mines': mines})
+        r = self.session.post(f'{hostname_prod}/games', json={'height': height, 'width': width, 'mines': mines})
         if r.status_code >= 300:
             exit(f"somethign went wrong!\nStatus code: {r.status_code}\nReason: {r.text}")
         return r.json()
@@ -39,14 +40,14 @@ class MinesweeperAPIClient:
         return self.actionOnACell(x, y, 'set-red-flag')
 
     def actionOnACell(self, game_id, x, y, action):
-        r = self.session.patch(f'http://{hostname}/games/{game_id}',
+        r = self.session.patch(f'{hostname_prod}/games/{game_id}',
                                json={'action': action, 'position': {'x': x, 'y': y}})
         if r.status_code >= 300:
             exit(f"somethign went wrong!\nStatus code: {r.status_code}\nReason: {r.text}")
         return r.json()
 
     def draw(self, game_id, debug=False):
-        r = self.session.get(f'http://{hostname}/games{game_id}/ascii', params={'debug': debug})
+        r = self.session.get(f'{hostname_prod}/games{game_id}/ascii', params={'debug': debug})
         if r.status_code >= 300:
             exit(f"somethign went wrong!\nStatus code: {r.status_code}\nReason: {r.text}")
         return r.json()
