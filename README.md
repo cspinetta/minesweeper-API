@@ -7,6 +7,12 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 - [Scala] v2.13.x
 - [Play framework] v2.8.x
 
+## Minesweeper-CLI
+
+`minesweeper-cli` is a user-friendly command-line interface to interact and play the Minesweeper.
+
+Go to the sub-folder [minesweeper-cli](./minesweeper-cli)
+
 ## API
 
 This app uses Basic Access Authentication. More info at https://en.wikipedia.org/wiki/Basic_access_authentication
@@ -185,7 +191,7 @@ sbt clean coverage test coverageReport
 4. [x] Authentication
 5. [x] Functional tests
 6. [x] Doc + Swagger
-7. [ ] Release MVP in a platform
+7. [x] Release MVP in a platform
 8. [ ] Contextual logging
 9. [ ] Metrics
 10. [ ] Tracing
