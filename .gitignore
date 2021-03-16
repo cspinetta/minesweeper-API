@@ -35,3 +35,5 @@ conf/environment-override.conf
 
 # Env file
 playground/.env
+
+env/
