@@ -6,7 +6,7 @@ import requests as requests
 
 hostname_dev = 'http://localhost:9000'
 hostname_prod = 'https://cspinetta-minesweeper-api.herokuapp.com'
-api_hostname = hostname_dev
+api_hostname = hostname_prod
 
 user_action_new = 'new'
 user_action_details = 'details'
