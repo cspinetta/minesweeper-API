@@ -6,7 +6,13 @@
 # create user public with password public
 ./minesweeper-cli.py user -a new -u public -p public
 
-# create game with height 10, width 10 and 10 mines
+# delete the user public with password public
+./minesweeper-cli.py user -a delete -u public -p public
+
+# see user details for the user public with password public
+./minesweeper-cli.py user -u public -p public
+
+# create a game with height 10, width 10 and 10 mines
 ./minesweeper-cli.py game new -u public -p public -he 10 -w 10 -m 10
 
 # draw the board for game ID 1

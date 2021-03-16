@@ -3,6 +3,8 @@ API for Minesweeper game
 
 The development is guided by the following instructions: [INSTRUCTIONS.md](INSTRUCTIONS.md)
 
+You can use the [minesweeper-cli](./minesweeper-cli) to play [Minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)).
+
 ## Dependencies:
 - [Scala] v2.13.x
 - [Play framework] v2.8.x
@@ -11,144 +13,13 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 
 This app uses Basic Access Authentication. More info at https://en.wikipedia.org/wiki/Basic_access_authentication
 
-**You can explore the Swagger UI:**
-
-![Swagger UI](docs/swagger-api-doc_v2.png)
-
-- At localhost:
-
-http://localhost:9000/docs/swagger-ui/index.html?url=/assets/swagger.json#/
-
-- At production:
+**Swagger UI:**
 
 https://cspinetta-minesweeper-api.herokuapp.com/docs/swagger-ui/index.html?url=/assets/swagger.json
 
-**Or pick a curl:**
+![Swagger UI](docs/swagger-api-doc_v2.png)
 
-* **/health-check**
-
-````shell script
-curl -X GET https://cspinetta-minesweeper-api.herokuapp.com/health-check
-````
-
-* **/players**
-
-**Create:**
-
-````shell script
-curl --request POST \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/player \
-  --header 'Content-Type: application/json' \
-  --data '{
-	"username": "<username>",
-	"password": "<password>"
-}'
-````
-
-**Get by ID:**
-
-````shell script
-curl --request GET \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/player \
-  --header 'Authorization: Basic <credentials>'
-````
-
-**Delete by ID:**
-
-````shell script
-curl --request DELETE \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/player/2 \
-  --header 'Authorization: Basic <credentials>'
-````
-
-* **/games**
-
-**Create a new one:**
-
-````shell script
-curl --request POST \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/games \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Basic <credentials>' \
-  --data '{
-	"playerId": 1,
-	"height": 10,
-	"width": 10,
-	"mines": 4
-}'
-````
-
-**Get by ID:**
-
-````shell script
-curl --request GET \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
-  --header 'Authorization: Basic <credentials>'
-````
-
-**Reveal a cell:**
-
-````shell script
-curl --request PATCH \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Basic <credentials>' \ 
-  --data '{
-	"action": "reveal",
-	"position": {
-		"x": 8,
-		"y": 10
-	}
-}'
-````
-
-**Set a question flag:**
-
-````shell script
-curl --request PATCH \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Basic <credentials>' \ 
-  --data '{
-	"action": "set-question-flag",
-	"position": {
-		"x": 8,
-		"y": 10
-	}
-}'
-````
-
-**Set a red flag:**
-
-````shell script
-curl --request PATCH \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Basic <credentials>' \ 
-  --data '{
-	"action": "set-red-flag",
-	"position": {
-		"x": 8,
-		"y": 10
-	}
-}'
-````
-
-**Clean a cell:**
-
-````shell script
-curl --request PATCH \
-  --url https://cspinetta-minesweeper-api.herokuapp.com/games/1 \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Basic <credentials>' \ 
-  --data '{
-	"action": "clean",
-	"position": {
-		"x": 8,
-		"y": 10
-	}
-}'
-````
+Check the wiki for more info or examples with `curl`: [API doc](https://github.com/cspinetta/minesweeper-API/wiki/API)
 
 ## Development process
 
@@ -181,7 +52,7 @@ sbt clean coverage test coverageReport
 
 `minesweeper-cli` is a user-friendly command-line interface to interact and play the Minesweeper.
 
-Go to the sub-folder [minesweeper-cli](./minesweeper-cli)
+Go to the folder [minesweeper-cli](./minesweeper-cli)
 
 ![Minesweeper CLI](docs/minsweeper-cli_v1.png)
 
