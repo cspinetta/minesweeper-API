@@ -32,6 +32,12 @@
 
 # clean cell (x: 2, y: 9) for game ID 2
 ./minesweeper-cli.py game play -u public -p public -a clean -i 2 -x 2 -y 9
+
+# pause game ID 1
+./minesweeper-cli.py game pause -u public -p public -i 1
+
+# resume game ID 1
+./minesweeper-cli.py game resume -u public -p public -i 1
 ```
 
 ### Example in pictures
@@ -72,16 +78,19 @@ optional arguments:
 **sub-command game:**
 
 ```shell script
-usage: minesweeper-cli.py game [-h] {new,play,draw} ...
+usage: minesweeper-cli.py game [-h] {new,play,pause,resume,draw} ...
 
 positional arguments:
-  {new,play,draw}  play actions help
-    new            New game
-    play           Play game
-    draw           Draw the game
+  {new,play,pause,resume,draw}
+                        play actions help
+    new                 New game
+    play                Play game
+    pause               Pause the game
+    resume              Resume the game
+    draw                Draw the game
 
 optional arguments:
-  -h, --help       show this help message and exit
+  -h, --help            show this help message and exit
 ```
 
 **sub-command game new:**
@@ -116,6 +125,34 @@ optional arguments:
   --debug               Show mines in the board
   --action [{reveal,add-red-flag,add-question-flag,clean}], -a [{reveal,add-red-flag,add-question-flag,clean}]
                         Action. Default: reveal
+  --user USER, -u USER  Username
+  --password PASSWORD, -p PASSWORD
+                        Password
+```
+
+**sub-command game pause:**
+
+```shell script
+usage: minesweeper-cli.py game pause [-h] --id GAME_ID --user USER --password PASSWORD
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --id GAME_ID, -i GAME_ID
+                        Game ID
+  --user USER, -u USER  Username
+  --password PASSWORD, -p PASSWORD
+                        Password
+```
+
+**sub-command game resume:**
+
+```shell script
+usage: minesweeper-cli.py game resume [-h] --id GAME_ID --user USER --password PASSWORD
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --id GAME_ID, -i GAME_ID
+                        Game ID
   --user USER, -u USER  Username
   --password PASSWORD, -p PASSWORD
                         Password

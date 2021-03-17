@@ -30,6 +30,10 @@ def run():
             subcommand_game_new(api_client, args)
         elif args.play_actions == 'play':
             subcommand_game_play(api_client, args)
+        elif args.play_actions == 'pause':
+            subcommand_game_pause(api_client, args)
+        elif args.play_actions == 'resume':
+            subcommand_game_resume(api_client, args)
         else:
             subcommand_game_draw(api_client, args)
     except KeyboardInterrupt:
@@ -90,8 +94,22 @@ def create_parser():
                                       help='Action. Default: reveal')
     add_credentials_args(play_game_subcommand)
 
-    # sub-command game play
-    # e.g. game play -u user -p pass -x 5 -y 25
+    # sub-command game pause
+    # e.g. game pause -u user -p pass
+    pause_game_subcommand = parser_game_subcommands.add_parser('pause', help='Pause the game')
+    pause_game_subcommand.add_argument('--id', '-i', required=True, type=int, dest='game_id',
+                                      help='Game ID')
+    add_credentials_args(pause_game_subcommand)
+
+    # sub-command game resume
+    # e.g. game resume -u user -p pass
+    resume_game_subcommand = parser_game_subcommands.add_parser('resume', help='Resume the game')
+    resume_game_subcommand.add_argument('--id', '-i', required=True, type=int, dest='game_id',
+                                      help='Game ID')
+    add_credentials_args(resume_game_subcommand)
+
+    # sub-command game draw
+    # e.g. game draw -u user -p pass --debug
     draw_game_subcommand = parser_game_subcommands.add_parser('draw', help='Draw the game')
     draw_game_subcommand.add_argument('--id', '-i', required=True, type=int, dest='game_id',
                                       help='Game ID')
@@ -117,7 +135,8 @@ def subcommand_user(api_client, args):
     elif args.user_action == user_action_details:
         r = api_client.player_details()
     elif args.user_action == user_action_delete:
-        r = api_client.player_delete()
+        api_client.player_delete()
+        r = 'No-Content'
     print(r)
 
 
@@ -145,6 +164,16 @@ def subcommand_game_play(api_client, args):
         print(api_client.draw(args.game_id, debug=True))
     else:
         print(api_client.draw(args.game_id, debug=args.game_debug))
+
+
+def subcommand_game_pause(api_client, args):
+    api_client.pause(args.game_id)
+    print(api_client.draw(args.game_id, debug=False))
+
+
+def subcommand_game_resume(api_client, args):
+    api_client.resume(args.game_id)
+    print(api_client.draw(args.game_id, debug=False))
 
 
 def subcommand_game_draw(api_client, args):
@@ -179,7 +208,7 @@ class MinesweeperAPIClient:
     def player_delete(self):
         r = self.session.delete(f'{api_hostname}/player')
         self.handle_error(r)
-        return r.json()
+        return
 
     def new_game(self, height, width, mines):
         r = self.session.post(f'{api_hostname}/games', json={'height': height, 'width': width, 'mines': mines})
@@ -203,6 +232,16 @@ class MinesweeperAPIClient:
                                json={'action': action, 'position': {'x': x, 'y': y}})
         self.handle_error(r)
         return r.json()
+
+    def pause(self, game_id):
+        r = self.session.post(f'{api_hostname}/games/{game_id}/state', json={'action': 'pause'})
+        self.handle_error(r)
+        return r.text
+
+    def resume(self, game_id):
+        r = self.session.post(f'{api_hostname}/games/{game_id}/state', json={'action': 'resume'})
+        self.handle_error(r)
+        return r.text
 
     def draw(self, game_id, debug):
         params = {}
