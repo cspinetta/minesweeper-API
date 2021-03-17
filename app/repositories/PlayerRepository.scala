@@ -23,7 +23,7 @@ class PlayerRepository @Inject()() extends Logging {
       Left(NotUniqueError("Another player with same username already exists"))
     case Failure(e) =>
       logger.error("Error while saving player", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while saving player"))
   }
 
   def deactivate(id: Long)(implicit session: DBSession): Either[AppError, Unit] = Try {
@@ -32,7 +32,7 @@ class PlayerRepository @Inject()() extends Logging {
     case Success(_) => Right(())
     case Failure(e) =>
       logger.error("Error while deactivating player", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while deactivating player"))
   }
 
   def findById(id: Long)(implicit session: DBSession): Either[AppError, Player] = Try {
@@ -42,7 +42,7 @@ class PlayerRepository @Inject()() extends Logging {
     case Success(None) => Left(ResourceNotFound(s"player with $id not found"))
     case Failure(e) =>
       logger.error("Error while finding player", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while finding player by ID"))
   }
 
   def findByCredentials(user: String, encodedPass: String)(implicit session: DBSession): Either[AppError, Player] = Try {
@@ -52,19 +52,8 @@ class PlayerRepository @Inject()() extends Logging {
     case Success(None) => Left(ResourceNotFound(s"player $user not found"))
     case Failure(e) =>
       logger.error("Error while finding player", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while finding player with credentials"))
   }
-
-  //  def exists(user: String, encodedPass: String)(implicit session: DBSession): Either[AppError, Boolean] = Try {
-  //    PlayerRepository.findById(id)
-  //  } match {
-  //    case Success(Some(_)) => Right(true)
-  //    case Success(None) => Right(false)
-  //    case Failure(e) =>
-  //      logger.error("Error while finding player", e)
-  //      Left(UnexpectedError("Unexpected error"))
-  //  }
-
 }
 
 object PlayerRepository extends SQLSyntaxSupport[Player] {
