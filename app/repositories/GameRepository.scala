@@ -70,8 +70,9 @@ object GameRepository extends SQLSyntaxSupport[Game] {
   import gameBinders._
 
   override val tableName = "game"
-  override val columns = Seq("id", "player_id", "state", "start_time", "finish_time", "height", "width", "mines",
-    "created_at", "deleted_at")
+  override val columns = Seq("id", "player_id", "state",
+    "start_time", "finish_time", "last_start_to_play", "total_time_seconds",
+    "height", "width", "mines", "created_at", "deleted_at")
 
   // simple extractor
   def apply(p: SyntaxProvider[Game])(rs: WrappedResultSet): Game = apply(p.resultName)(rs)
@@ -82,6 +83,8 @@ object GameRepository extends SQLSyntaxSupport[Game] {
     state = rs.get(p.state),
     startTime = rs.get(p.startTime),
     finishTime = rs.get(p.finishTime),
+    lastStartToPlay = rs.get(p.lastStartToPlay),
+    totalTimeSeconds = rs.get(p.totalTimeSeconds),
     height = rs.get(p.height),
     width = rs.get(p.width),
     mines = rs.get(p.mines),
@@ -125,6 +128,8 @@ object GameRepository extends SQLSyntaxSupport[Game] {
         column.playerId -> playerId,
         column.state -> gameState,
         column.startTime -> startTime,
+        column.lastStartToPlay -> startTime,
+        column.totalTimeSeconds -> 0L,
         column.height -> height,
         column.width -> width,
         column.mines -> mines,
@@ -136,6 +141,8 @@ object GameRepository extends SQLSyntaxSupport[Game] {
       playerId = playerId,
       state = gameState,
       startTime = startTime,
+      lastStartToPlay = startTime,
+      totalTimeSeconds = 0L,
       height = height,
       width = width,
       mines = mines,
@@ -149,6 +156,9 @@ object GameRepository extends SQLSyntaxSupport[Game] {
         column.playerId -> game.playerId,
         column.state -> game.state,
         column.startTime -> game.startTime,
+        column.finishTime -> game.finishTime,
+        column.lastStartToPlay -> game.lastStartToPlay,
+        column.totalTimeSeconds -> game.totalTimeSeconds,
         column.height -> game.height,
         column.width -> game.width,
         column.mines -> game.mines)

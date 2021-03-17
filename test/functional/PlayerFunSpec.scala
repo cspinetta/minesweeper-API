@@ -10,11 +10,12 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import support.json.JsonSupport
+import utils.auth.AuthUtilsT
 
 /**
  * Functional tests for Player endpoints.
  */
-class PlayerFunSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport {
+class PlayerFunSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport with AuthUtilsT {
 
   "PlayerController" should {
 
@@ -64,8 +65,9 @@ class PlayerFunSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport {
     }
 
     "respond with Unauthorized when trying to get the user details with bad credentials" in {
+      val nonexistentUser = Base64.getEncoder.encodeToString("player_1:987654321".getBytes)
       val req = FakeRequest(GET, "/player")
-        .withHeaders("Authorization" -> s"Basic ${Base64.getEncoder.encodeToString("player_1:987654321".getBytes)}")
+        .withHeaders("Authorization" -> s"Basic $nonexistentUser")
       val eventualResult = route(app, req).get
 
       status(eventualResult) mustBe Status.UNAUTHORIZED
@@ -86,7 +88,8 @@ class PlayerFunSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport {
              |  "password": "$password"
              |}
           """.stripMargin))
-      route(app, reqPost).get
+      val result = route(app, reqPost).get
+      status(result) mustBe Status.OK
 
       val req = FakeRequest(DELETE, "/player")
         .withHeaders("Authorization" -> s"Basic $passToken")
@@ -96,7 +99,4 @@ class PlayerFunSpec extends PlaySpec with GuiceOneAppPerSuite with JsonSupport {
     }
   }
 
-  private def basicAuthToken(user: String, pass: String): String = {
-    Base64.getEncoder.encodeToString(s"$user:$pass".getBytes)
-  }
 }

@@ -21,6 +21,8 @@ object GameExamples extends JsonSupport {
       state = GameState.Running,
       startTime = now,
       finishTime = None,
+      lastStartToPlay = now,
+      totalTimeSeconds = 0,
       height = CreationCommand.height,
       width = CreationCommand.width,
       mines = CreationCommand.mines,

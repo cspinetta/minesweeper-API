@@ -4,7 +4,7 @@ import com.github.tototoshi.play2.json4s.Json4s
 import controllers.response._
 import javax.inject._
 import models.GameActions._
-import models.{InvalidParametersError, ResourceNotFound}
+import models.{InvalidParametersError, InvalidStateTransitionError, ResourceNotFound}
 import org.json4s.JValue
 import play.api.Logging
 import play.api.mvc._
@@ -93,6 +93,35 @@ class GameController @Inject()(val controllerComponents: ControllerComponents,
       case Left(err) =>
         logger.error("set cell request cannot be parsed", err)
         BadRequest(BadRequestResponse("set cell request cannot be parsed", ErrorCode.ValidationError).asJson)
+    }
+  }
+
+  /**
+   * Update game state (pause / resume) given the game id and the desired new state.
+   *
+   * @return 200 OK - the game is updated, otherwise 4XX or 5XX errors.
+   */
+  def updateGameState(id: Long): Action[JValue] = userAuthenticated(json4s.json) { req =>
+    catching(classOf[Exception]).either(req.body.extract[GameStateCommand]) match {
+      case Right(cmd) =>
+        withinTx(session =>
+          gameService.validateGameByUser(id, req.user.userId)(session).flatMap(game =>
+            gameService.updateGameState(game, cmd)(session))) match {
+          case Right(game) =>
+            logger.debug(s"game successfully updated [id: ${game.id}, player_id: ${game.playerId}, " +
+              s"UpdateGameStateCommand: $cmd]")
+            Ok(GameResponse(game).asJson)
+          case Left(_: ResourceNotFound) =>
+            NotFound(NotFoundResponse("Game cannot be found", ErrorCode.NotFound).asJson)
+          case Left(err: InvalidStateTransitionError) =>
+            BadRequest(BadRequestResponse(s"Game cannot be updated. Reason: ${err.reason}", ErrorCode.ClientError).asJson)
+          case Left(err) =>
+            logger.error(s"error while updating the game. Reason: ${err.reason}", err)
+            InternalServerError(InternalServerErrorResponse("game cannot be updated", ErrorCode.InternalError).asJson)
+        }
+      case Left(err) =>
+        logger.error("update game state request cannot be parsed", err)
+        BadRequest(BadRequestResponse("update game state request cannot be parsed", ErrorCode.ValidationError).asJson)
     }
   }
 

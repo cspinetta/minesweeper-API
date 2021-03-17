@@ -10,6 +10,20 @@ object GameActions {
 
   case class GameCreationCommand(height: Int, width: Int, mines: Int)
 
+  case class GameStateCommand(action: GameStateAction)
+
+  sealed abstract class GameStateAction(override val entryName: String) extends EnumEntry
+
+  object GameStateAction extends Enum[GameStateAction] {
+
+    val values: immutable.IndexedSeq[GameStateAction] = findValues
+
+    case object Pause extends GameStateAction("pause")
+
+    case object Resume extends GameStateAction("resume")
+
+  }
+
   case class SetCellStateCommand(action: CellAction, position: Position)
 
   sealed abstract class CellAction(override val entryName: String) extends EnumEntry
@@ -36,6 +50,8 @@ case class Game(id: Long,
                 state: GameState = GameState.Running,
                 startTime: ZonedDateTime,
                 finishTime: Option[ZonedDateTime] = None,
+                lastStartToPlay: ZonedDateTime,
+                totalTimeSeconds: Long,
                 height: Int,
                 width: Int,
                 mines: Int,

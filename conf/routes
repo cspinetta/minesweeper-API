@@ -173,9 +173,39 @@ GET           /games/:id                    controllers.GameController.findById(
 PATCH         /games/:id                    controllers.GameController.setCellState(id: Long)
 
 ###
-#  summary: Get ASCII representation of the game board given the id.
+#  summary: Update game state (pause / resume) given the game id and the desired new state
 #  tags:
 #    - Game
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/models.GameActions.GameStateCommand'
+#  security:
+#    - BasicAuth: []
+#  responses:
+#    200:
+#      description: The game state is updated and the new game state is returned
+#      schema:
+#        $ref: '#/definitions/controllers.response.GameResponse'
+#    400:
+#      description: update cell state request cannot be parsed
+#      schema:
+#        $ref: '#/definitions/controllers.response.BadRequestResponse'
+#    404:
+#      description: Game / cell position cannot be found
+#      schema:
+#        $ref: '#/definitions/controllers.response.NotFoundResponse'
+#    500:
+#      description: Cell cannot be updated
+#      schema:
+#        $ref: '#/definitions/controllers.response.InternalServerErrorResponse'
+###
+POST          /games/:id/state              controllers.GameController.updateGameState(id: Long)
+
+###
+#  summary: Get ASCII representation of the game board given the id.
+#  tags:
+#    - AsciiPrinter
 #  security:
 #    - BasicAuth: []
 #  responses:

@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 
 import com.github.tototoshi.play2.json4s.Json4s
 import enumeratum.Json4s
-import models.GameActions.CellAction
+import models.GameActions.{CellAction, GameStateAction}
 import models.{CellState, GameState}
 import org.json4s.ext.JavaTimeSerializers
 import org.json4s.{DefaultFormats, Extraction, Formats, JValue}
@@ -28,6 +28,7 @@ trait Json4SSerializer extends JsonSerializer {
   } ++ JavaTimeSerializers.all
     + Json4s.serializer(GameState)
     + Json4s.serializer(CellState)
+    + Json4s.serializer(GameStateAction)
     + Json4s.serializer(CellAction))
     .strict
     .withTypeHintFieldName("type")
