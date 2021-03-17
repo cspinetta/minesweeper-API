@@ -3,6 +3,7 @@ package controllers
 import com.github.tototoshi.play2.json4s.Json4s
 import controllers.response.HealthCheckResponse
 import javax.inject._
+import play.api.Logging
 import play.api.mvc._
 
 /**
@@ -11,7 +12,7 @@ import play.api.mvc._
 @Singleton
 class HealthCheckController @Inject()(val controllerComponents: ControllerComponents,
                                       val json4s: Json4s)
-  extends ApiController {
+  extends ApiController with Logging {
 
   val healthCheckResponse: HealthCheckResponse = HealthCheckResponse(
     status = "OK"

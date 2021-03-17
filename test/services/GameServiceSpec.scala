@@ -59,7 +59,7 @@ class GameServiceSpec extends fixture.FlatSpec with Connection with AutoRollback
     game.width must be(cmd.width)
     game.height must be(cmd.height)
     game.mines must be(cmd.mines)
-    game.state must be(GameState.Running)
+    game.state must (equal(GameState.Running) or equal(GameState.Won))
     game.finishTime must be(None)
     game.deletedAt must be(None)
 
