@@ -3,7 +3,7 @@ package controllers
 import com.github.tototoshi.play2.json4s.Json4s
 import controllers.response._
 import javax.inject._
-import models.{NotUniqueError, PlayerCreationCommand, ResourceNotFound}
+import models.PlayerCreationCommand
 import org.json4s.JValue
 import play.api.Logging
 import play.api.mvc._
@@ -31,20 +31,15 @@ class PlayerController @Inject()(val controllerComponents: ControllerComponents,
   def create(): Action[JValue] = Action(json4s.json) { req =>
     catching(classOf[Exception]).either(req.body.extract[PlayerCreationCommand]) match {
       case Right(cmd) =>
-        withinTx(session => playerService.create(cmd)(session)) match {
-          case Right(player) =>
-            logger.info(s"player successfully saved [id: ${player.id}]")
-            Ok(PlayerResponse(player).asJson)
-          case Left(err: NotUniqueError) =>
-            logger.error(s"error while saving player. Reason: ${err.reason}", err)
-            Conflict(BadRequestResponse("player already exists", ErrorCode.AlreadyExists).asJson)
-          case Left(err) =>
-            logger.error(s"error while saving player. Reason: ${err.reason}", err)
-            InternalServerError(InternalServerErrorResponse("player cannot be saved", ErrorCode.InternalError).asJson)
+        handleAppError(
+          withinTx(session => playerService.create(cmd)(session)),
+          operation = "create a user", entity = "user") { user =>
+          logger.info(s"user successfully saved [id: ${user.id}]")
+          Ok(PlayerResponse(user).asJson)
         }
       case Left(err) =>
-        logger.error("player cannot be parsed", err)
-        BadRequest(BadRequestResponse("player cannot be parsed", ErrorCode.ValidationError).asJson)
+        logger.error("user cannot be parsed", err)
+        BadRequest(BadRequestResponse("user cannot be parsed", ErrorCode.ValidationError).asJson)
     }
   }
 
@@ -54,14 +49,10 @@ class PlayerController @Inject()(val controllerComponents: ControllerComponents,
    * @return 200 OK - the player if it's found, otherwise 4XX or 5XX errors.
    */
   def details(): Action[AnyContent] = userAuthenticated { req =>
-    withinTx(session => playerService.findById(req.user.userId)(session)) match {
-      case Right(player) =>
-        Ok(PlayerResponse(player).asJson)
-      case Left(_: ResourceNotFound) =>
-        NotFound(NotFoundResponse("Player cannot be found", ErrorCode.NotFound).asJson)
-      case Left(err) =>
-        logger.error(s"Error while finding player. Reason: ${err.reason}", err)
-        InternalServerError(InternalServerErrorResponse("Player cannot be found", ErrorCode.InternalError).asJson)
+    handleAppError(
+      withinTx(session => playerService.findById(req.user.userId)(session)),
+      operation = "get user details", entity = "user") { player =>
+      Ok(PlayerResponse(player).asJson)
     }
   }
 
@@ -71,13 +62,11 @@ class PlayerController @Inject()(val controllerComponents: ControllerComponents,
    * @return 204 NO_CONTENT - the player is deleted, otherwise 4XX or 5XX errors.
    */
   def delete(): Action[AnyContent] = userAuthenticated { req =>
-    withinTx(session => playerService.deactivate(req.user.userId)(session)) match {
-      case Right(_) =>
-        logger.info(s"Player successfully deactivated [id: ${req.user.userId}]")
-        NoContent
-      case Left(err) =>
-        logger.error(s"Error while deactivating player [id: ${req.user.userId}]. Reason: ${err.reason}", err)
-        InternalServerError(InternalServerErrorResponse(s"Player cannot be deactivated [id: ${req.user.userId}]", ErrorCode.InternalError).asJson)
+    handleAppError(
+      withinTx(session => playerService.deactivate(req.user.userId)(session)),
+      operation = "delete a user", entity = "user") { _ =>
+      logger.info(s"Player successfully deactivated [id: ${req.user.userId}]")
+      NoContent
     }
   }
 }

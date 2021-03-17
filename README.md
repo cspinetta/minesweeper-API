@@ -6,6 +6,7 @@ The development is guided by the following instructions: [INSTRUCTIONS.md](INSTR
 You can use the [minesweeper-cli](./minesweeper-cli) to play [Minesweeper](https://en.wikipedia.org/wiki/Minesweeper_(video_game)).
 
 ## Dependencies:
+- [Java] >= v11.x
 - [Scala] v2.13.x
 - [Play framework] v2.8.x
 
@@ -17,7 +18,7 @@ This app uses Basic Access Authentication. More info at https://en.wikipedia.org
 
 https://cspinetta-minesweeper-api.herokuapp.com/docs/swagger-ui/index.html?url=/assets/swagger.json
 
-![Swagger UI](docs/swagger-api-doc_v2.png)
+![Swagger UI](docs/swagger-api-doc_v3.png)
 
 Check the wiki for more info or examples with `curl`: [API doc](https://github.com/cspinetta/minesweeper-API/wiki/API)
 
@@ -91,5 +92,6 @@ to get a productive MVP with the required functionalities.
 
 ![Basic functional flow](docs/minisweeper_basic-functional-flow_v1.png)
 
+[Java]: https://openjdk.java.net/
 [Scala]: https://www.scala-lang.org/
 [Play framework]: https://www.playframework.com/

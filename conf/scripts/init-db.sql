@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS game (
   state varchar(64) not null,
   start_time timestamp not null,
   finish_time timestamp,
+  last_start_to_play timestamp not null,
+  total_time_seconds bigint not null,
   height int not null,
   width int not null,
   mines int not null,

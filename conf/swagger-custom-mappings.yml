@@ -23,3 +23,9 @@
       - set-question-flag
       - set-red-flag
       - clean
+- type: models\.GameActions\.GameStateAction
+  specAsParameter:
+    - type: string
+    - enum:
+      - pause
+      - resume
