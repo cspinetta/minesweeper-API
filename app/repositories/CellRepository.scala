@@ -18,7 +18,7 @@ class CellRepository @Inject()() extends Logging {
     case Success(_) => Right(())
     case Failure(e) =>
       logger.error("Error while saving new cells", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while saving new cells"))
   }
 
   def save(cell: Cell)(implicit session: DBSession): Either[AppError, Unit] = Try {
@@ -28,7 +28,7 @@ class CellRepository @Inject()() extends Logging {
     case Success(affectedRows) if affectedRows <= 0 => Left(UnexpectedError("Unexpected error. No affected rows when trying to update a cell"))
     case Failure(e) =>
       logger.error(s"Error while saving a cell [id: ${cell.id}]", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while saving a cell"))
   }
 }
 

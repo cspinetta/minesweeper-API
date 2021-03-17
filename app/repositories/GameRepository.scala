@@ -20,8 +20,8 @@ class GameRepository @Inject()() extends Logging {
   } match {
     case Success(value) => Right(value)
     case Failure(e) =>
-      logger.error("Error while saving new game", e)
-      Left(UnexpectedError("Unexpected error"))
+      logger.error("Error while saving a new game", e)
+      Left(DataSourceError("Error while saving a new game"))
   }
 
   def save(game: Game)(implicit session: DBSession): Either[AppError, Unit] = Try {
@@ -31,7 +31,7 @@ class GameRepository @Inject()() extends Logging {
     case Success(affectedRows) => Left(UnexpectedError("Unexpected error. No affected rows when trying to update a game"))
     case Failure(e) =>
       logger.error(s"Error while saving a game [id: ${game.id}]", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while saving a game"))
   }
 
   def deactivate(id: Long)(implicit session: DBSession): Either[AppError, Unit] = Try {
@@ -40,7 +40,7 @@ class GameRepository @Inject()() extends Logging {
     case Success(_) => Right(())
     case Failure(e) =>
       logger.error("Error while deactivating game", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while deactivating game"))
   }
 
   def findById(id: Long)(implicit session: DBSession): Either[AppError, Game] = Try {
@@ -50,7 +50,7 @@ class GameRepository @Inject()() extends Logging {
     case Success(None) => Left(ResourceNotFound(s"game $id not found"))
     case Failure(e) =>
       logger.error("Error while deactivating game", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while deactivating game"))
   }
 
   def findByIdAndPlayer(id: Long, userId: Long)(implicit session: DBSession): Either[AppError, Game] = Try {
@@ -60,7 +60,7 @@ class GameRepository @Inject()() extends Logging {
     case Success(None) => Left(ResourceNotFound(s"game $id not found"))
     case Failure(e) =>
       logger.error("Error while deactivating game", e)
-      Left(UnexpectedError("Unexpected error"))
+      Left(DataSourceError("Error while deactivating game"))
   }
 
 }

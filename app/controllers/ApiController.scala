@@ -14,16 +14,18 @@ abstract class ApiController extends BaseController with JsonSupport with PlayJs
       case Right(value) => f(value)
       case Left(err: InvalidParametersError) =>
         logger.error(s"error while $operation. Reason: ${err.reason}", err)
-        UnprocessableEntity(UnprocessableResponse(s"invalid parameter", ErrorCode.ValidationError).asJson)
-      case Left(_: InvalidStateTransitionError) =>
-        BadRequest(BadRequestResponse(s"$entity cannot transit the state", ErrorCode.ClientError).asJson)
-      case Left(_: ResourceNotFound) =>
-        NotFound(NotFoundResponse(s"$entity cannot be found", ErrorCode.NotFound).asJson)
-      case Left(_: NotUniqueError) =>
-        Conflict(BadRequestResponse(s"$entity is not unique", ErrorCode.AlreadyExists).asJson)
+        UnprocessableEntity(UnprocessableResponse(s"Invalid parameter. Reason: ${err.reason}", ErrorCode.ValidationError).asJson)
+      case Left(err: InvalidStateTransitionError) =>
+        BadRequest(BadRequestResponse(s"$entity cannot transit the state. Reason: ${err.reason}", ErrorCode.ClientError).asJson)
+      case Left(err: ClientError) =>
+        BadRequest(BadRequestResponse(s"Reason: ${err.reason}", ErrorCode.ClientError).asJson)
+      case Left(err: ResourceNotFound) =>
+        NotFound(NotFoundResponse(s"$entity cannot be found. Reason: ${err.reason}", ErrorCode.NotFound).asJson)
+      case Left(err: NotUniqueError) =>
+        Conflict(BadRequestResponse(s"$entity is not unique. Reason: ${err.reason}", ErrorCode.AlreadyExists).asJson)
       case Left(err) =>
-        logger.error(s"error while $operation. Reason: ${err.reason}", err)
-        InternalServerError(InternalServerErrorResponse("unexpected error", ErrorCode.InternalError).asJson)
+        logger.error(s"Error while $operation. Reason: ${err.reason}", err)
+        InternalServerError(InternalServerErrorResponse(s"Unexpected error. Reason: ${err.reason}", ErrorCode.InternalError).asJson)
     }
   }
 }
