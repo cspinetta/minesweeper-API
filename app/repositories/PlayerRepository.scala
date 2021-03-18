@@ -88,14 +88,14 @@ object PlayerRepository extends SQLSyntaxSupport[Player] {
 
   // find by primary key
   def findByCredentials(username: String, encodedPass: String)(implicit session: DBSession): Option[Player] = withSQL {
-    select.from(PlayerRepository as p).where.eq(p.username, username).and.eq(p.encodedPass, encodedPass).and.append(isNotDeleted)
+    select.from(PlayerRepository as p).where.eq(p.username, username).and.eq(p.encodedPass, encodedPass.getBytes).and.append(isNotDeleted)
   }.map(PlayerRepository(p)).single.apply()
 
   def create(username: String, encodedPass: String, createdAt: ZonedDateTime = ZonedDateTime.now)(implicit session: DBSession): Player = {
     val id = withSQL {
       insert.into(PlayerRepository).namedValues(
         column.username -> username,
-        column.encodedPass -> encodedPass,
+        column.encodedPass -> encodedPass.getBytes,
         column.createdAt -> createdAt)
     }.updateAndReturnGeneratedKey.apply()
 
